@@ -1,0 +1,60 @@
+body {
+  font-family: "Inter", sans-serif;
+}
+h2{
+  color: #1F80FF;
+}
+
+.page{
+  display: flex;
+  height: 100vh;
+  padding: 10px;
+}
+
+.left-section{
+  width: 40%;
+  margin-left: 10px;
+  font-size: 60px;
+
+}
+
+.right-section{
+  width: 60%;
+  background-image: url("../img/tripBack.avif");
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.login-card{
+  width: 320px;
+  padding: 40px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 20px;
+  backdrop-filter: blur(10px);
+  color: white;
+}
+
+.login-card h3{
+  font-size: 50px;
+  color: white;
+}
+.login-card h4{
+  color: white;
+}
+
+input[type="text"],
+input[type="password"]{
+  width: 80%;
+  height: 35px;
+  margin: 20px;
+  border-radius: 20px;
+  border:none;
+}
+
+a{
+  color: #1F80FF;
+}
+

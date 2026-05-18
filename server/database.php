@@ -94,7 +94,8 @@
 
 			
 		}
-	public function loginUser($email, $password){
+
+		public function loginUser($email, $password){
 			$stmt = $this->conn->prepare('SELECT salt FROM user WHERE email=?');
 			$stmt->bind_param('s', $email);
 
@@ -142,7 +143,7 @@
 		}
 
 
-		// params has search[city] d.g.("Durban") and sort[cost] d.g.("ASC" / "DESC")
+		// params has search[city] e.g.("Durban") and sort[cost] e.g.("ASC" / "DESC")
 		public function searchServices($params){
 			$searchSQL = "";
 			$sortSQL = "";

@@ -235,6 +235,36 @@
 			return $ret;
 
 		}
+
+		public function addImagesToPackage($savedFiles, $package_id){
+			if (count($savedFiles) == 0){
+				return;
+			}
+			$SQL = 'INSERT INTO package_images (package_id, image) VALUES (?, ?)';
+
+			$mask = "ss";
+			$inputs = [];
+
+			$inputs[] = $package_id;
+			$inputs[] = $savedFiles[0];
+
+			for ($i = 1;$i < count($savedFiles); $i++){
+				$mask .= "ss";
+
+				$inputs[] = $package_id;
+				$inputs[] = $savedFiles[i];
+				$SQL .= ", (?, ?)";			
+				
+
+			
+			}
+
+
+			$stmt = $this->conn->prepare($SQL);
+
+			$stmt->bind_param($mask, ...$inputs);
+			$stmt->execute();
+		}
 	// get all of one kind of service
 	// create package
 	// edit package

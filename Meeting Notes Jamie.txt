@@ -22,7 +22,6 @@ traveller view
 
 
 travel agency view
-	create services
 	create package
 		add service
 	create group trip

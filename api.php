@@ -4,6 +4,8 @@
 	
 	require_once("./server/database.php");
 	require_once("./server/searchServices");
+	require_once("./server/searchPackages");
+	require_once("./server/review");
 	require_once("./server/loginapi");
 	require_once("./server/logoutapi");
 	require_once("./server/registerapi");
@@ -11,12 +13,16 @@
 	$db = Database::instance();
 	$method = $_SERVER["REQUEST_METHOD"];
 	
+	$data = null;
 	
-	
-    $json = file_get_contents('php://input');
 	if ($method == "POST"){
 
-		$data = json_decode($json);
+		if (!empty($_POST)) {
+   			$data = $_POST;
+		} else {
+    		$raw_data = file_get_contents('php://input');
+   			$data = json_decode($raw_data, true) ?? null;
+		}
 		// empty request body
 		if ($data == null){
 			header('HTTP/1.1 400 Bad Request');
@@ -45,6 +51,12 @@
 				break;
 			case "searchServices":
 				searchServices($data);
+				break;
+			case "searchPackages":
+				searchPackages($data);
+				break;
+			case "review":
+				review($data);
 				break;
 
 			default:

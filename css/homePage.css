@@ -44,6 +44,16 @@ h2{
 .login-card h4{
   color: white;
 }
+.agent-button{
+  display: inline-block;
+  margin: 20px 20px 10px;
+  padding: 14px 22px;
+  border-radius: 24px;
+  background: white;
+  color: #1f80ff;
+  text-decoration: none;
+  font-weight: 700;
+}
 
 input[type="text"],
 input[type="password"]{

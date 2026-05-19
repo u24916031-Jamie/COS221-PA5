@@ -16,7 +16,7 @@ class Database {
 		return $instance; 
 	}
 	private function __construct() { 
-		$host = '127.0.0.1:3306';
+		$host = '127.0.0.1';
 		mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 		$this->conn = new mysqli($host, $username, $password);
 		$this->conn->options(MYSQLI_OPT_INT_AND_FLOAT_NATIVE, true);

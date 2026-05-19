@@ -66,6 +66,8 @@
 					$ret = $stmt->execute();
 					$stmt->close();
 					$target_id = $this->conn->insert_id;
+
+
 					
 					$stmt = $this->conn->prepare('INSERT INTO travel_agency (user_id, agency_name, contact_fname,contact_lname, target_id) VALUES (?, ?, ?, ?, ?)');
 					$stmt->bind_param('sssss', $user_id, $agency_name, $contact_fname, $contact_lname, $target_id);
@@ -176,6 +178,22 @@
 				$ret[] = $val;
 			}
 			return $ret;
+
+
+		}
+
+		public function review($params){
+			$stmt = $this->conn->prepare('INSERT INTO review (review_id, rating, comment, date, user_id, target_id) VALUES (NULL, ?, ?, ?, ?, ?)');
+			$stmt->bind_param('sssss', $rating, $comment, $date, $user_id, $target_id);
+			
+			$rating = $params['rating'];
+			$comment = $params['comment'];
+			$date = $params['date'];
+			$user_id = $_SESSION["user_id"];
+			$target_id = $params['target_id'];
+
+			$ret = $stmt->execute();
+			$stmt->close();
 
 
 		}

@@ -61,8 +61,8 @@ function register($data){
 	
 	$newUserData = [
 		// user
-		"user_type"=>$data->user_type,
-		"password_hash"=>$data->hashed_pass,
+		"user_type"=>$data->User_type,
+		"password_hash"=>$hashed_pass,
 		"email"=>$data->email,
 		"cell"=>$data->cell,
 		"salt"=>$salt,
@@ -87,6 +87,13 @@ function register($data){
 	];
 			
 	echo json_encode($retdata);
+
+  if($ret["User_type"] == "Travel Agency"){
+    header("Location: ../loginClient.html");
+  }else if($ret["User_type"] == "Traveller"){
+    header("Location: ../loginUser.html");
+  }
+  exit();
 }
 
 

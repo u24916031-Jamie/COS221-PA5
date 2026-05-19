@@ -8,14 +8,15 @@
   </head>
 
   <div class = "login-card" style = "width: 500px">
-    <form>
+    <form action="server/registerapi.php" method="POST">
       <h3>Sign Up</h3>
-        <input type="text" name="cFname" placeholder="Enter your first name">
-        <input type="text" name="cLname" placeholder="Enter your surname">
-        <input type="text" name="cEmail" placeholder="Enter your email">
-        <input type="text" name="idNum" placeholder="Enter your id number">
-        <input type="password" name="cPwd" placeholder="Enter account password">
-      <button class="submit">sign up</button>
+        <input type = "email" name="email" placeholder = "Email" required>
+        <input type = "password" name="password" placeholder = "Password" required>
+        <input type="text" name = "cell" placeholder="Cellphone number" required>
+        <input type="text" name="fname" placeholder="Enter your first name" required>
+        <input type="text" name="lname" placeholder="Enter your surname" required>
+        <input type="text" name="idNum" placeholder="Enter your id number" required>
+      <button type="submit" class="agent-button">Sign up</button>
     </form>
   </div>
 </html>

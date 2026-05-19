@@ -145,27 +145,25 @@
 		}
 
 
-		// params has search[city] e.g.("Durban") and sort[cost] e.g.("ASC" / "DESC")
+		// params has search e.g.("Durban"), and order e.g.("ASC" / "DESC")
 		public function searchServices($params){
 			$searchSQL = "";
-			$sortSQL = "";
+			$orderSQL = "";
 			if (isset($params["search"])){
-				if (isset($params["search"]["city"])){
-					$searchSQL = " WHERE city LIKE ?";
-				}
+				$searchSQL = " WHERE city LIKE ?";
 			}
-			if (isset($params["sort"])){
-				if (isset($params["sort"]["cost"])){
-					$sortSQL = " ORDERBY cost ?";
-				}
+	
+			if (isset($params["order"])){
+				
+				$orderSQL = " ORDERBY service_id ?";
 			}
 
 
-			$sql = 'SELECT * FROM service' . $searchSQL . $sortSQL;
+			$sql = 'SELECT * FROM service' . $searchSQL . $orderSQL;
 			
 
 			$stmt = $this->conn->prepare($sql);
-			$stmt->bind_param('ss',"%".$params["search"]["city"]."%", $params["sort"]["cost"]);
+			$stmt->bind_param('sss',"%".$params["search"]."%", $params["order"]);
 
 
 			$stmt->execute();
@@ -197,7 +195,51 @@
 
 
 		}
-	// search packages (description)
+
+		// search packages ( search[description], sort[cost, rating], order[ASC or DESC])
+		public function searchPackages($params){
+	
+			
+		
+
+	
+
+
+			$sql = 'SELECT P.package_id, P.name, P.price, P.description, AVG(R.rating) AS rating FROM package P LEFT JOIN review R on P.target_id = R.target_id GROUP BY P.package_id HAVING P.description LIKE ? ORDERBY ? ?'; 
+			
+			$searchString = "";
+			if (isset($params["search"])){
+				$searchString = $params["search"];
+			}
+			$sortString = "package_id";
+			if (isset($params["sort"])){
+				$sortString = $params["sort"];
+			}
+			$orderString = "ASC";
+			if (isset($params["order"])){
+				$orderString = $params["order"];
+			}
+			$stmt = $this->conn->prepare($sql);
+			$stmt->bind_param('sss',"%".$searchString."%", $sortString, $orderSQL);
+
+
+			$stmt->execute();
+			$result = $stmt->get_result();
+			if (!$result) {
+				echo("Query failed: " . $conn->error);
+			}
+			$ret = [];
+			while($val = $result->fetch_assoc()){
+				$ret[] = $val;
+			}
+			return $ret;
+
+		}
+	// get all of one kind of service
+	// create package
+	// edit package
+	// delete package
+	// create group trip
 }
 
 

@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: May 19, 2026 at 11:25 AM
+-- Generation Time: May 19, 2026 at 11:42 AM
 -- Server version: 10.3.39-MariaDB-0+deb10u2
 -- PHP Version: 7.3.31-1~deb10u7
 
@@ -52,7 +52,7 @@ CREATE TABLE `ATTRACTION` (
 CREATE TABLE `BOOKS` (
   `User_id` int(11) NOT NULL,
   `Package_id` int(11) NOT NULL,
-  `Promo_Code` text DEFAULT NULL
+  `Code_id` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -252,7 +252,8 @@ ALTER TABLE `ATTRACTION`
 --
 ALTER TABLE `BOOKS`
   ADD PRIMARY KEY (`User_id`,`Package_id`),
-  ADD KEY `Package_id` (`Package_id`);
+  ADD KEY `Package_id` (`Package_id`),
+  ADD KEY `Code_id` (`Code_id`);
 
 --
 -- Indexes for table `DESTINATION`
@@ -407,7 +408,8 @@ ALTER TABLE `ATTRACTION`
 --
 ALTER TABLE `BOOKS`
   ADD CONSTRAINT `BOOKS_ibfk_1` FOREIGN KEY (`User_id`) REFERENCES `TRAVELLER` (`User_id`),
-  ADD CONSTRAINT `BOOKS_ibfk_2` FOREIGN KEY (`Package_id`) REFERENCES `PACKAGE` (`Package_id`);
+  ADD CONSTRAINT `BOOKS_ibfk_2` FOREIGN KEY (`Package_id`) REFERENCES `PACKAGE` (`Package_id`),
+  ADD CONSTRAINT `BOOKS_ibfk_3` FOREIGN KEY (`Code_id`) REFERENCES `PROMO_CODE` (`Code_id`);
 
 --
 -- Constraints for table `DESTINATION`

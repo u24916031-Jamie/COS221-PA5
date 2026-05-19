@@ -12,11 +12,11 @@ traveller view
 		what packages use that service
 	view travel agency
 		see all offered packages
-		*give review
+		*give review (DONE)
 
 	view/book packages
 		search / sort (description, city), sort(travel agency, cost)
-		*give review
+		*give review (DONE)
 
 	*view/book group trip
 

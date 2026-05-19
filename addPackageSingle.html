@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <title>Add Single Package</title>
+    <link rel="stylesheet" href="css/navbar.css" />
+    <link rel="stylesheet" href="css/homePage.css" />
+    <link rel="stylesheet" href="css/signUp.css" />
+    <link rel="stylesheet" href="css/addPackageSingle.css" />
+  </head>
+  <body>
+    <ul>
+      <li><a href="homePage.html">Home</a></li>
+      <li><a href="browseProducts.html">Browse</a></li>
+      <li><a href="packagesNdeals.html">Deals</a></li>
+    </ul>
+
+    <div class="page">
+      <div class="left-section"></div>
+      
+      <div class="right-section">
+        <div class="login-card">
+          <form action="server/api.php" method="POST" enctype="multipart/form-data">
+            <h3 style="text-align: center; width: 100%; margin-top: 0;">Create Single Package</h3>
+            
+            <div class="section-title">General Details</div>
+            <input type="text" name="packageName" placeholder="Package Name" required>
+            <input type="number" name="packagePrice" placeholder="Total Price (ZAR)" required>
+            <textarea name="packageDescription" placeholder="Package Description" required></textarea>
+
+            <div class="section-title">Media</div>
+            <div class="image-upload-container">
+              <label for="package-images-single" class="custom-file-upload">
+                <span style="font-size: 24px; display: block; margin-bottom: 5px;">📷</span>
+                Click to select Package Images
+              </label>
+              <input type="file" id="package-images-single" class="hidden-upload" name="packageImages[]" accept="image/png, image/jpeg, image/jpg, image/webp" multiple>
+              <div id="image-preview-container-single" class="preview-container"></div>
+            </div>
+
+            <div class="section-title" style="margin-top: 30px;">Services Builder</div>
+            <div id="services-container" style="width: 100%;"></div>
+
+            <button type="button" id="add-service-btn" style="background: rgba(255, 255, 255, 0.2); border: 2px dashed rgba(255, 255, 255, 0.5); color: white; padding: 10px 20px; border-radius: 15px; cursor: pointer; margin: 15px auto; display: block; width: 85%; font-family: 'Inter', sans-serif; transition: 0.3s;">
+              + Add New Service
+            </button>
+
+            <input type="hidden" name="type" value="addPackageSingle">
+
+            <button type="submit" class="submit" style="margin-top: 40px; width: 85%;">Publish Single Package</button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <script>
+        //Multiple image selector and preview
+      document.getElementById('package-images-single').addEventListener('change', function(event) 
+      {
+        const previewContainer = document.getElementById('image-preview-container-single');
+        previewContainer.innerHTML = ''; 
+        const files = event.target.files;
+        Array.from(files).forEach(file => {
+          if (!file.type.startsWith('image/')) return; 
+          const reader = new FileReader();
+          reader.onload = function(e) {
+            const img = document.createElement('img');
+            img.src = e.target.result;
+            img.classList.add('preview-image');
+            previewContainer.appendChild(img);
+          }
+          reader.readAsDataURL(file);
+        });
+      });
+      //add as many services as you want
+      document.getElementById('add-service-btn').addEventListener('click', function() 
+      {
+        const container = document.getElementById('services-container');
+        const index = container.children.length;
+        
+        const block = document.createElement('div');
+        block.style.cssText = 'border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.1); padding: 20px; border-radius: 15px; margin: 15px auto; width: 85%; box-sizing: border-box;';
+        
+        block.innerHTML = `
+          <select name="services[${index}][type]" class="service-type" style="width: 100%; margin: 0 auto 15px auto;" required>
+            <option value="" disabled selected>Select Service Category</option>
+            <option value="accommodation">Accommodation</option>
+            <option value="flight">Flight</option>
+            <option value="restaurant">Restaurant</option>
+            <option value="attraction">Attraction</option>
+            <option value="destination">Destination</option>
+          </select>
+          <div class="dynamic-fields" style="width: 100%;"></div>
+          <button type="button" class="remove-service" style="background: rgba(255, 50, 50, 0.7); color: white; border: none; padding: 8px 15px; border-radius: 10px; cursor: pointer; margin-top: 15px; width: 100%;">Remove Service</button>
+        `;
+        
+        container.appendChild(block);
+        
+        block.querySelector('.service-type').addEventListener('change', function(e) 
+        {
+          const fieldsDiv = block.querySelector('.dynamic-fields');
+          const type = e.target.value;
+          
+          let specificHTML = '';
+          
+          if(type === 'flight') 
+          {
+             specificHTML = `<input type="text" name="services[${index}][flight_number]" placeholder="Flight Number (e.g. FA100)" style="width: 100%; margin: 10px 0;" required>`;
+          } 
+          else if(type === 'destination') 
+          {
+             specificHTML = `<textarea name="services[${index}][description]" placeholder="Destination Overview" style="width: 100%; margin: 10px 0; height: 60px;" required></textarea>`;
+          } 
+          else 
+          {
+             const capitalizedType = type.charAt(0).toUpperCase() + type.slice(1);
+             specificHTML = `<input type="text" name="services[${index}][name]" placeholder="${capitalizedType} Name" style="width: 100%; margin: 10px 0;" required>`;
+          }
+          
+          fieldsDiv.innerHTML = `
+            ${specificHTML}
+            <input type="text" name="services[${index}][street]" placeholder="Street Address" style="width: 100%; margin: 10px 0;">
+            <div style="display: flex; gap: 10px; margin: 10px 0;">
+              <input type="text" name="services[${index}][city]" placeholder="City" style="width: 50%; margin: 0;">
+              <input type="text" name="services[${index}][code]" placeholder="Postal Code" style="width: 50%; margin: 0;">
+            </div>
+          `;
+        });
+        
+        block.querySelector('.remove-service').addEventListener('click', function() {
+          block.remove();
+        });
+      });
+    </script>
+  </body>
+</html>

@@ -1,12 +1,13 @@
 <!doctype html>
 <html lang="en">
   <head>
-    <meta charset="UTF-8">
-    <title>Add Single Package</title>
-    <link rel="stylesheet" href="../css/navbar.css" />
-    <link rel="stylesheet" href="../css/homePage.css" />
-    <link rel="stylesheet" href="../css/signUp.css" />
-    <link rel="stylesheet" href="../css/addPackageSingle.css" />
+    <head>
+  <meta charset="UTF-8">
+  <title>Add Single Package</title>
+  <link rel="stylesheet" href="../css/navbar.css" />
+  <link rel="stylesheet" href="../css/homePage.css" />
+  <link rel="stylesheet" href="../css/signUp.css" />
+  <link rel="stylesheet" href="../css/addPackageSingle.css" />
   </head>
   <body>
     <?php include '../navbar.php'; ?>

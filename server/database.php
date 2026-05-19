@@ -1,9 +1,6 @@
 <?php
 
-$env = parse_ini_file('.env');
-$username = $env['USERNAME'];
-$password = $env['PASSWORD'];
-$dbname = $env['DBNAME'];
+
 class Database {
 	private $conn;
 
@@ -16,7 +13,12 @@ class Database {
 		return $instance; 
 	}
 	private function __construct() { 
-		$host = 'wheatley.cs.up.ac.za';
+		$host = 'localhost'; //change host to the local or sm
+    $env = parse_ini_file('.env');
+    $username = $env['USERNAME'];
+    $password = $env['PASSWORD'];
+    $dbname = $env['DBNAME'];
+
 		mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 		$this->conn = new mysqli($host, $username, $password);
 		$this->conn->options(MYSQLI_OPT_INT_AND_FLOAT_NATIVE, true);
@@ -103,7 +105,13 @@ class Database {
 
 		$stmt->execute();
 		$result = $stmt->get_result();
-		$salt = $result->fetch_assoc()["salt"];
+    //added check for non-existing emails&users
+		$row = $result->fetch_assoc();
+    
+    if($row==null)
+      return false;
+
+    $salt = $row["salt"];
 		if ($salt == null){
 			return false;
 		}

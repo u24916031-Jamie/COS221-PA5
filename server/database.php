@@ -278,7 +278,6 @@ class Database {
 		
 
 	}
-// get all of one kind of service
 // create package
 // edit package
 // delete package

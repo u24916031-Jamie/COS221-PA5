@@ -5,6 +5,7 @@
 	require_once("./server/database.php");
 	require_once("./server/searchServices");
 	require_once("./server/loginapi");
+	require_once("./server/logoutapi");
 	require_once("./server/registerapi");
 	
 	$db = Database::instance();
@@ -35,6 +36,9 @@
 			
 			case "login":
 				login($data);
+				break;
+			case "logout":
+				logout();
 				break;
 			case "register":
 				register($data);

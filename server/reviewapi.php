@@ -30,6 +30,19 @@ function review($data){
 		return;
 	}
 
+	if ($data["rating"] < 1 || $data["rating"] > 5){
+		header('HTTP/1.1 400 Bad Request');
+		header('Content-Type: application/json');
+		$retdata = [
+			'status' => 'error',
+			'timestamp' => time(),
+			'data' => 'rating must be between 1 and 5'
+		];
+				
+		echo json_encode($retdata);
+		return;
+	}
+
 	$db = Database::instance();
 
 	$db->review($data);

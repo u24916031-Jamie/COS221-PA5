@@ -3,12 +3,15 @@
 	session_start();
 	
 	require_once("./server/database.php");
-	require_once("./server/searchServices");
-	require_once("./server/searchPackages");
-	require_once("./server/review");
-	require_once("./server/loginapi");
-	require_once("./server/logoutapi");
-	require_once("./server/registerapi");
+	require_once("./server/loginapi.php");
+	require_once("./server/logoutapi.php");
+	require_once("./server/registerapi.php");
+	require_once("./server/searchServices.php");
+	require_once("./server/searchPackages.php");
+	require_once("./server/review.php");
+	require_once("./server/createPackage.php");
+	require_once("./server/viewPackage.php");
+	
 	
 	$db = Database::instance();
 	$method = $_SERVER["REQUEST_METHOD"];
@@ -58,8 +61,25 @@
 			case "review":
 				review($data);
 				break;
+			case "createPackage":
+				createPackage($data);
+				break;
 
-			default:
+			case "viewPackage":
+				viewPackage($data);
+
+
+
+				case "viewTravelAgency":
+
+
+				case "createGroupTrip":
+
+
+				
+				
+				
+					default:
 			// invalid request type
 				header('HTTP/1.1 400 Bad Request');
 				header('Content-Type: application/json');

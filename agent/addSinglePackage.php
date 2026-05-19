@@ -1,7 +1,6 @@
 <!doctype html>
 <html lang="en">
   <head>
-    <head>
   <meta charset="UTF-8">
   <title>Add Single Package</title>
   <link rel="stylesheet" href="../css/navbar.css" />

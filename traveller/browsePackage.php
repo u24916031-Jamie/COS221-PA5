@@ -30,6 +30,6 @@
       <div class="packages-grid" id="packagesGrid"></div>
     </div>
 
-    <script src="../js/homepage.js"></script>
+    <script src="../js/browsePackages.js"></script>
   </body>
 </html>

@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <title>Homepage</title>
+    <link rel="stylesheet" href="css/navbar.css" />
+    <link rel="stylesheet" href="css/homePage.css" />
+    <link rel="stylesheet" href="css/browsePackages.css" />
+  </head>
+  <body>
+    <ul>
+      <li><a href="#homePage" class="active">Home</a></li>
+      <li><a href="#browseProducts">Browse</a></li>
+      <li><a href="#packagesNdeals">Deals</a></li>
+    </ul>
+
+    <div class="browse-container">
+      <div class="search-section">
+        <input type="search" id="locationSearch" placeholder="Where to?">
+        
+        <select id="sortBy" class="sort-dropdown">
+          <option value="price">Sort by Price</option>
+          <option value="rating">Sort by Rating</option>
+        </select>
+        
+        <select id="sortOrder" class="sort-dropdown">
+          <option value="asc">Ascending</option>
+          <option value="desc">Descending</option>
+        </select>
+
+        <button class="search-btn" id="searchBtn">Search</button>
+      </div>
+
+      <div class="packages-grid" id="packagesGrid"></div>
+    </div>
+
+    <script src="js/browsePackages.js"></script>
+  </body>
+</html>

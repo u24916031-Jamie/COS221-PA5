@@ -57,8 +57,7 @@ function register($data){
 
 	$salt = bin2hex(random_bytes(10));
 	$hashed_pass = hash('sha256', $data->password . $salt);
-	$apikey = hash('sha256', $data->email . bin2hex(random_bytes(10)));
-	$apikey = substr($apikey, 0, strlen($apikey) /  2);
+
 	
 	$newUserData = [
 		// user

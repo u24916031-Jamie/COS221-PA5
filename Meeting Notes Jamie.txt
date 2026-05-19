@@ -1,0 +1,40 @@
+//GENERAL WEBSITE LAYOUT
+
+start
+
+	traveller login / register
+	travel agency login / register
+
+
+traveller view
+	view all services
+		search city
+		what packages use that service
+	view travel agency
+		see all offered packages
+		*give review
+
+	view/book packages
+		search / sort (description, city), sort(travel agency, cost)
+		*give review
+
+	*view/book group trip
+
+
+travel agency view
+	create services
+	create package
+		add service
+	create group trip
+	view package
+		edit each service
+
+
+
+all view pages
+	pages not lazy loading
+
+
+logout button
+	clear session on php
+	clear php session api

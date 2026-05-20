@@ -79,3 +79,36 @@ document.getElementById('add-service-btn').addEventListener('click', function()
     block.remove();
   });
 });
+
+document.getElementById('createPackageForm').addEventListener('submit', async function(e) 
+{
+    e.preventDefault(); 
+    const formData = new FormData(this);
+
+    try {
+        const response = await fetch('../api.php', 
+          {
+            method: 'POST',
+            body: formData
+        });
+
+        const textResponse = await response.text();
+        if (!textResponse.trim().startsWith('{')) {
+            console.error("Server crashed:", textResponse);
+            alert("A server error occurred. Check the console.");
+            return;
+        }
+
+        const result = JSON.parse(textResponse);
+        if (result.status === 'success') 
+          {
+            alert('Package Created Successfully!');
+            window.location.reload(); 
+        } else {
+            alert('Error: ' + (result.data || 'Unknown error'));
+        }
+    } catch (error) {
+        console.error('Fetch Error:', error);
+        alert('Failed to communicate with the server.');
+    }
+});

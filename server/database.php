@@ -273,35 +273,19 @@ class Database {
     }
 
 
-	public function addImagesToPackage($savedFiles, $package_id){
-		if (count($savedFiles) == 0){
-			return;
-		}
-		$SQL = 'INSERT INTO package_images (package_id, image) VALUES (?, ?)';
-
-		$mask = "ss";
-		$inputs = [];
-
-		$inputs[] = $package_id;
-		$inputs[] = $savedFiles[0];
-
-		for ($i = 1;$i < count($savedFiles); $i++){
-			$mask .= "ss";
-
-			$inputs[] = $package_id;
-			$inputs[] = $savedFiles[i];
-			$SQL .= ", (?, ?)";			
-			
-
-		
-		}
-
-
-		$stmt = $this->conn->prepare($SQL);
-
-		$stmt->bind_param($mask, ...$inputs);
-		$stmt->execute();
-	}
+	//made the images easier to store with forloop
+    public function addImagesToPackage($savedFiles, $package_id){
+        if (empty($savedFiles)){
+            return;
+        }
+        
+        $stmt = $this->conn->prepare('INSERT INTO PACKAGE_IMAGES (Package_id, Image) VALUES (?, ?)');
+        foreach ($savedFiles as $img) {
+            $stmt->bind_param('is', $package_id, $img);
+            $stmt->execute();
+        }
+        $stmt->close();
+    }
 
 	public function createPackage($params){
         $stmt = $this->conn->prepare('INSERT INTO REVIEW_TARGET (Target_Type) VALUES (?)');
@@ -321,30 +305,7 @@ class Database {
             $this->addImagesToPackage($params["images"], $package_id);
         }
 
-	}
-	public function bookPackage($params){
-		$code_id = null;
-		$trip_id = null;
-		if (isset($params["trip_id"])){
-			$trip_id = $params["trip_id"];
-		}
-		if (isset($params["code_name"])){
-			$stmt = $this->conn->prepare('SELECT code_id FROM promo_code WHERE code_name=?');
-			$stmt->bind_param('s', $params["code_name"]);
-			$stmt->execute();
-			$result = $stmt->get_result();
-			$code_id = ($result->fetch_assoc())["code_id"];
-			$stmt->close();
-		}
-
-		$stmt = $this->conn->prepare('INSERT INTO books (user_id, package_id, code_id, trip_id) VALUES (?, ?, ?, ?)');
-		$stmt->bind_param('iiii', $_SESSION["user_id"], $params["package_id"], $code_id, $trip_id);
-		$ret = $stmt->execute();
-		$stmt->close();
-
-		
-
-	}
+	
         if (!empty($params["services"])) {
             foreach ($params["services"] as $svc) {
                 $stmt = $this->conn->prepare("INSERT INTO SERVICE (Street, City, Code) VALUES (?, ?, ?)");
@@ -383,19 +344,33 @@ class Database {
         }
         return true;
     }
-	//made the images easier to store with forloop
-    public function addImagesToPackage($savedFiles, $package_id){
-        if (empty($savedFiles)){
-            return;
-        }
-        
-        $stmt = $this->conn->prepare('INSERT INTO PACKAGE_IMAGES (Package_id, Image) VALUES (?, ?)');
-        foreach ($savedFiles as $img) {
-            $stmt->bind_param('is', $package_id, $img);
-            $stmt->execute();
-        }
-        $stmt->close();
-    }
+
+
+
+	
+	public function bookPackage($params){
+		$code_id = null;
+		$trip_id = null;
+		if (isset($params["trip_id"])){
+			$trip_id = $params["trip_id"];
+		}
+		if (isset($params["code_name"])){
+			$stmt = $this->conn->prepare('SELECT code_id FROM promo_code WHERE code_name=?');
+			$stmt->bind_param('s', $params["code_name"]);
+			$stmt->execute();
+			$result = $stmt->get_result();
+			$code_id = ($result->fetch_assoc())["code_id"];
+			$stmt->close();
+		}
+
+		$stmt = $this->conn->prepare('INSERT INTO books (user_id, package_id, code_id, trip_id) VALUES (?, ?, ?, ?)');
+		$stmt->bind_param('iiii', $_SESSION["user_id"], $params["package_id"], $code_id, $trip_id);
+		$ret = $stmt->execute();
+		$stmt->close();
+
+		
+
+	}
 // edit package
 // delete package
 // create group trip

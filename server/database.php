@@ -483,6 +483,7 @@ class Database {
 		return $ret;
 
 	}
+	
 // edit package
 // delete package
 // create group trip

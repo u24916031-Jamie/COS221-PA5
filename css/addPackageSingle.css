@@ -214,3 +214,14 @@ input[type="file"].hidden-upload {
   background: #45a049;
   transform: scale(1.02);
 }
+
+.address-grid {
+    display: flex;
+    gap: 10px;
+    margin: 10px 0;
+}
+
+.address-grid input {
+    flex: 1; /* Makes them share space equally */
+    margin: 0 !important;
+}

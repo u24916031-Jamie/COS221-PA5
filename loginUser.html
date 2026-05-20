@@ -13,9 +13,11 @@
       <div class = "right-section">
         <div class = "login-card">
           <h3>Login</h3>
-          <input type = "text" placeholder = "Username">
-          <input type = "password" placeholder = "Password">
-          <a class="traveller-button" href="traveller/browsePackage.php">Start Browsing</a>
+          <form action="api.php" method="POST">
+          <input type = "email" name="email" placeholder = "Email" required>
+          <input type = "password" name="password" placeholder = "Password" required>
+          <button type="submit" class="agent-button">Login</button>
+          </form>
           <p>Don't have an account?<a href = "signUpUser.html"> Sign in </a></p>
         </div>
       </div>

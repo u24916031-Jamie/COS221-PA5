@@ -8,7 +8,7 @@
 	require_once("./server/registerapi.php");
 	require_once("./server/searchServices.php");
 	require_once("./server/searchPackages.php");
-	require_once("./server/review.php");
+	require_once("./server/reviewapi.php");
 	require_once("./server/createPackage.php");
 	require_once("./server/viewPackage.php");
 	
@@ -16,7 +16,6 @@
 	$db = Database::instance();
 	$method = $_SERVER["REQUEST_METHOD"];
 	
-	$data = null;
 	
 	if ($method == "POST"){
 
@@ -39,9 +38,8 @@
 			echo json_encode($retdata);
 			exit();
 		}
-
-		if (isset($data->type)){
-			switch ($data->type){
+		if (isset($data["type"])){
+			switch ($data["type"]){
 			
 			case "login":
 				login($data);

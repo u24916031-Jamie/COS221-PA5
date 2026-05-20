@@ -1,75 +1,58 @@
 <?php
 
-function createPackage($data){
+function createPackage($data)
+{
+    if (!isset($_SESSION["user_id"]) || $_SESSION["user_type"] != "Travel Agency")
+	{
+        header('Content-Type: application/json');
+        echo json_encode(['status' => 'error', 'data' => 'Unauthorized. Must be an Agency.']);
+        return;
+    }
 
-	if (!isset($_SESSION["user_id"])){
-				header('HTTP/1.1 401 Unauthorized');
-		header('Content-Type: application/json');
-		$retdata = [
-			'status' => 'error',
-			'timestamp' => time(),
-			'data' => 'Must be logged in to create a package'
-		];
-				
-		echo json_encode($retdata);
-		return;
-	}
-	if ($_SESSION["user_type"]!= "Travel Agency"){
-		header('HTTP/1.1 401 Unauthorized');
-		header('Content-Type: application/json');
-		$retdata = [
-			'status' => 'error',
-			'timestamp' => time(),
-			'data' => 'Only a travel agency may make a package'
-		];
-				
-		echo json_encode($retdata);
-		return;
-	}
+    if (empty($data["name"]) || empty($data["price"]) || empty($data["description"]))
+		{
+        header('Content-Type: application/json');
+        echo json_encode(['status' => 'error', 'data' => 'Missing required package details.']);
+        return;
+    }
 
-	if (!isset($data["name"]) || !isset($data["price"]) || !isset($data["description"])){
+    $uploadedImages = [];
+    if (isset($_FILES['packageImages'])) 
+		{
+        $fileCount = count($_FILES['packageImages']['name']);
+        for ($i = 0; $i < $fileCount; $i++) {
+            if ($_FILES['packageImages']['error'][$i] === UPLOAD_ERR_OK) 
+				{
+                $tmpName = $_FILES['packageImages']['tmp_name'][$i];
+                $fileName = time() . '_' . basename($_FILES['packageImages']['name'][$i]);
+                $destination = './img/' . $fileName; 
 
-		header('HTTP/1.1 400 Bad Request');
-		header('Content-Type: application/json');
-		$retdata = [
-			'status' => 'error',
-			'timestamp' => time(),
-			'data' => 'Post parameters are missing'
-		];
-				
-		echo json_encode($retdata);
-		return;
-	}
+                if (move_uploaded_file($tmpName, $destination)) 
+					{
+                    $uploadedImages[] = '../img/' . $fileName; 
+                }
+            }
+        }
+    }
 
-	if ($data["price"] < 0){
-		header('HTTP/1.1 400 Bad Request');
-		header('Content-Type: application/json');
-		$retdata = [
-			'status' => 'error',
-			'timestamp' => time(),
-			'data' => 'price cannot be negative'
-		];
-				
-		echo json_encode($retdata);
-		return;
-	}
+    $db = Database::instance();
+    $params = [
+        "name" => $data["name"],
+        "price" => $data["price"],
+        "description" => $data["description"],
+        "images" => $uploadedImages,
+        "services" => $data["services"] ?? [] 
+    ];
 
-	$db = Database::instance();
-
-	$db->createPackage($data);
-
-
-
-	header('HTTP/1.1 200 Ok');
-	header('Content-Type: application/json');
-	$retdata = [
-		'status' => 'success'
-	];
-			
-	echo json_encode($retdata);
-
-
+    if ($db->createPackage($params)) 
+		{
+        header('Content-Type: application/json');
+        echo json_encode(['status' => 'success']);
+    } else 
+	{
+        header('Content-Type: application/json');
+        echo json_encode(['status' => 'error', 'data' => 'Failed to save to database.']);
+    }
+    exit();
 }
-
-
 ?>

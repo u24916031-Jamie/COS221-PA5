@@ -304,20 +304,22 @@ class Database {
 	}
 
 	public function createPackage($params){
-		$stmt = $this->conn->prepare('INSERT INTO review_target (target_id, target_type) VALUES (NULL, ?)');
-		$stmt->bind_param('s', "Package");
-		$ret = $stmt->execute();
-		$stmt->close();
-		$target_id = $this->conn->insert_id;
+        $stmt = $this->conn->prepare('INSERT INTO REVIEW_TARGET (Target_Type) VALUES (?)');
+        $type = "Package";
+        $stmt->bind_param('s', $type);
+        $stmt->execute();
+        $target_id = $this->conn->insert_id;
+        $stmt->close();
 
-		$stmt = $this->conn->prepare('INSERT INTO package(name, price, description, user_id, target_id VALUES (?, ?, ?, ?, ?)');
-		$stmt->bind_param('sssss', $params["name"], $params["price"], $params["description"], $_SESSION["user_id"], $target_id);
-		$ret = $stmt->execute();
-		$stmt->close();
-		$package_id = $this->conn->insert_id;
+        $stmt = $this->conn->prepare('INSERT INTO PACKAGE (Name, Price, Description, User_id, Target_id) VALUES (?, ?, ?, ?, ?)');
+        $stmt->bind_param('sdssi', $params["name"], $params["price"], $params["description"], $_SESSION["user_id"], $target_id);
+        $stmt->execute();
+        $package_id = $this->conn->insert_id;
+        $stmt->close();
 
-		$this->addImagesToPackage($params["images"], $package_id);
-		
+        if (!empty($params["images"])) {
+            $this->addImagesToPackage($params["images"], $package_id);
+        }
 
 	}
 	public function bookPackage($params){
@@ -343,6 +345,57 @@ class Database {
 		
 
 	}
+        if (!empty($params["services"])) {
+            foreach ($params["services"] as $svc) {
+                $stmt = $this->conn->prepare("INSERT INTO SERVICE (Street, City, Code) VALUES (?, ?, ?)");
+                $street = $svc['street'] ?? 'N/A';
+                $city = $svc['city'] ?? 'N/A';
+                $code = $svc['code'] ?? '0000';
+                $stmt->bind_param('sss', $street, $city, $code);
+                $stmt->execute();
+                $service_id = $this->conn->insert_id;
+                $stmt->close();
+
+                $type = strtolower($svc['type']);
+                if ($type === 'accommodation' || $type === 'attraction' || $type === 'restaurant') {
+                    $table = strtoupper($type);
+                    $stmt = $this->conn->prepare("INSERT INTO $table (Service_id, Name) VALUES (?, ?)");
+                    $stmt->bind_param('is', $service_id, $svc['name']);
+                    $stmt->execute(); 
+                    $stmt->close();
+                } elseif ($type === 'flight') {
+                    $stmt = $this->conn->prepare("INSERT INTO FLIGHT (Service_id, Flight_number) VALUES (?, ?)");
+                    $stmt->bind_param('is', $service_id, $svc['flight_number']);
+                    $stmt->execute(); 
+                    $stmt->close();
+                } elseif ($type === 'destination') {
+                    $stmt = $this->conn->prepare("INSERT INTO DESTINATION (Service_id, Description) VALUES (?, ?)");
+                    $stmt->bind_param('is', $service_id, $svc['description']);
+                    $stmt->execute(); 
+                    $stmt->close();
+                }
+
+                $stmt = $this->conn->prepare("INSERT INTO INCLUDES (Package_id, Service_id) VALUES (?, ?)");
+                $stmt->bind_param('ii', $package_id, $service_id);
+                $stmt->execute();
+                $stmt->close();
+            }
+        }
+        return true;
+    }
+	//made the images easier to store with forloop
+    public function addImagesToPackage($savedFiles, $package_id){
+        if (empty($savedFiles)){
+            return;
+        }
+        
+        $stmt = $this->conn->prepare('INSERT INTO PACKAGE_IMAGES (Package_id, Image) VALUES (?, ?)');
+        foreach ($savedFiles as $img) {
+            $stmt->bind_param('is', $package_id, $img);
+            $stmt->execute();
+        }
+        $stmt->close();
+    }
 // edit package
 // delete package
 // create group trip

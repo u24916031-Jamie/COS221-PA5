@@ -12,6 +12,14 @@ async function fetchPackages() {
             })
         });
         const textResponse = await response.text();
+        
+        if (!textResponse.trim().startsWith('{') && !textResponse.trim().startsWith('[')) 
+          {
+            console.error("Server crashed and returned HTML instead of JSON. Raw output:", textResponse);
+            document.getElementById('packagesGrid').innerHTML = '<p style="text-align:center; width:100%; color:red;">Server error occurred. Check browser console.</p>';
+            return;
+        }
+
         const result = JSON.parse(textResponse);
         if (result.status === 'success') {
             renderPackages(result.data);
@@ -58,13 +66,13 @@ function renderPackages(data)
     });
 }
 
-//dynamic searching
+
 let searchTimeout;
 document.getElementById('locationSearch').addEventListener('input', function() {
     clearTimeout(searchTimeout);
     searchTimeout = setTimeout(fetchPackages, 300);
 });
-//click to search not really nessesary but added anyway
+
 document.getElementById('searchBtn').addEventListener('click', function(e) {
     e.preventDefault();
     fetchPackages();

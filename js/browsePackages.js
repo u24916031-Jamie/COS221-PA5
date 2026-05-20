@@ -1,59 +1,75 @@
-async function fetchPackages()
-{
-  try
-  {
-    const response = await fetch('server/api.php?type=getPackages');
-    const data = await response.json();
-    renderPackages(data);
-  }
-  catch (error)
-  {
-    console.error('Error fetching data:', error);
-  }
+async function fetchPackages() {
+    try {
+        const response = await fetch('../api.php', 
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                type: 'searchPackages',
+                search: document.getElementById('locationSearch').value || '',
+                sort: document.getElementById('sortBy').value || 'price',
+                order: document.getElementById('sortOrder').value || 'ASC'
+            })
+        });
+        const textResponse = await response.text();
+        const result = JSON.parse(textResponse);
+        if (result.status === 'success') {
+            renderPackages(result.data);
+        } else {
+            console.error('API Error:', result.data);
+        }
+    } 
+    catch (error) {
+        console.error('Fetch Error:', error);
+    }
 }
 
-function renderPackages(data)
+function renderPackages(data) 
 {
-  const grid = document.getElementById('packagesGrid');
-  grid.innerHTML = '';
-  data.forEach(pkg =>
-  {
-    const card = document.createElement('div');
-    card.className = 'package-card';
-    card.setAttribute('data-price', pkg.price);
-    card.setAttribute('data-rating', pkg.rating);
-    card.innerHTML = `
-      <img src="${pkg.img}" class="package-img">
-      <div class="package-info">
-        <span class="rating-badge">★ ${pkg.rating}</span>
-        <h3>${pkg.name}</h3>
-        <p class="package-price">ZAR ${pkg.price.toLocaleString()}</p>
-        <p class="package-desc">${pkg.desc}</p>
-        <button class="book-btn">View Details</button>
-      </div>
-    `;
-    grid.appendChild(card);
-  });
+    const grid = document.getElementById('packagesGrid');
+    grid.innerHTML = '';
+    
+    if (!data || data.length === 0) 
+    {
+        grid.innerHTML = '<p style="text-align:center; width:100%;">No packages found matching your criteria.</p>';
+        return;
+    }
+
+    data.forEach(pkg => {
+        const price = pkg.Price ? parseFloat(pkg.Price) : 0;
+        const rating = pkg.Rating ? parseFloat(pkg.Rating).toFixed(1) : '0.0';
+        const image = pkg.Image || '../img/tripBack.avif';
+        const name = pkg.Name || 'Unnamed Package';
+        const desc = pkg.Description || 'No description provided.';
+
+        const card = document.createElement('div');
+        card.className = 'package-card';
+        card.innerHTML = `
+            <img src="${image}" class="package-img" alt="${name}">
+            <div class="package-info">
+                <span class="rating-badge">★ ${rating}</span>
+                <h3>${name}</h3>
+                <p class="package-price">ZAR ${price.toLocaleString()}</p>
+                <p class="package-desc">${desc}</p>
+                <button class="book-btn">View Details</button>
+            </div>
+        `;
+        grid.appendChild(card);
+    });
 }
 
-document.getElementById('searchBtn').addEventListener('click', function()
-{
-  const sortBy = document.getElementById('sortBy').value;
-  const sortOrder = document.getElementById('sortOrder').value;
-  const grid = document.getElementById('packagesGrid');
-  const cards = Array.from(grid.getElementsByClassName('package-card'));
-
-  cards.sort((a, b) =>
-  {
-    let valA = parseFloat(a.getAttribute(sortBy === 'price' ? 'data-price' : 'data-rating'));
-    let valB = parseFloat(b.getAttribute(sortBy === 'price' ? 'data-price' : 'data-rating'));
-    return sortOrder === 'asc' ? valA - valB : valB - valA;
-  });
-
-  cards.forEach(card =>
-  {
-    grid.appendChild(card);
-  });
+//dynamic searching
+let searchTimeout;
+document.getElementById('locationSearch').addEventListener('input', function() {
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(fetchPackages, 300);
+});
+//click to search not really nessesary but added anyway
+document.getElementById('searchBtn').addEventListener('click', function(e) {
+    e.preventDefault();
+    fetchPackages();
 });
 
+document.getElementById('sortBy').addEventListener('change', fetchPackages);
+document.getElementById('sortOrder').addEventListener('change', fetchPackages);
 fetchPackages();

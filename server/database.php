@@ -14,7 +14,7 @@ class Database {
 	}
 	private function __construct() { 
 		$host = 'localhost'; //change host to the local or sm
-    $env = parse_ini_file('.env');
+    $env = parse_ini_file('.env.example');
     $username = $env['USERNAME'];
     $password = $env['PASSWORD'];
     $dbname = $env['DBNAME'];
@@ -203,40 +203,53 @@ class Database {
 
 
 	}
+		//added sort on destination and package name
+	public function searchPackages($params) 
+	{
+        $searchString = "%" . ($params["search"] ?? "") . "%";
+        
+        $sortParam = strtolower($params["sort"] ?? "price");
+        $sortString = "P.Price";
+        if ($sortParam === "rating") {
+            $sortString = "Rating";
+        }
+        $orderParam = strtoupper($params["order"] ?? "ASC");
+        $orderString = ($orderParam === "DESC") ? "DESC" : "ASC";
 
-	// search packages ( search[description], sort[cost, rating], order[ASC or DESC])
-	public function searchPackages($params){
-		$sql = 'SELECT P.package_id, P.name, P.price, P.description, AVG(R.rating) AS rating FROM package P LEFT JOIN review R on P.target_id = R.target_id GROUP BY P.package_id HAVING P.description LIKE ? ORDERBY ? ?'; 
-		
-		$searchString = "";
-		if (isset($params["search"])){
-			$searchString = $params["search"];
-		}
-		$sortString = "package_id";
-		if (isset($params["sort"])){
-			$sortString = $params["sort"];
-		}
-		$orderString = "ASC";
-		if (isset($params["order"])){
-			$orderString = $params["order"];
-		}
-		$stmt = $this->conn->prepare($sql);
-		$stmt->bind_param('sss',"%".$searchString."%", $sortString, $orderSQL);
-
-
-		$stmt->execute();
-		$result = $stmt->get_result();
-		if (!$result) {
-			echo("Query failed: " . $this->conn->error);
-		}
-		$ret = [];
-		while($val = $result->fetch_assoc()){
-			$ret[] = $val;
-		}
-		return $ret;
-
-	}
-
+        $sql = "SELECT P.Package_id, P.Name, P.Price, P.Description, 
+                       IFNULL(AVG(R.Rating), 0) AS Rating,
+                       (SELECT Image FROM PACKAGE_IMAGES PI WHERE PI.Package_id = P.Package_id LIMIT 1) AS Image
+                FROM PACKAGE P 
+                LEFT JOIN REVIEW R ON P.Target_id = R.Target_id 
+                LEFT JOIN INCLUDES INC ON P.Package_id = INC.Package_id
+                LEFT JOIN SERVICE S ON INC.Service_id = S.Service_id
+                LEFT JOIN DESTINATION D ON S.Service_id = D.Service_id
+                WHERE P.Name LIKE ? 
+                   OR P.Description LIKE ? 
+                   OR S.City LIKE ?
+                   OR D.Description LIKE ?
+                GROUP BY P.Package_id, P.Name, P.Price, P.Description
+                ORDER BY $sortString $orderString";
+        
+        $stmt = $this->conn->prepare($sql);
+        
+        if (!$stmt) {
+            error_log("Prepare failed: " . $this->conn->error);
+            return [];
+        }
+        $stmt->bind_param('ssss', $searchString, $searchString, $searchString, $searchString);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        if (!$result) {
+            error_log("Execute failed: " . $stmt->error);
+            return [];
+        }
+        $ret = [];
+        while($val = $result->fetch_assoc()){
+            $ret[] = $val;
+        }
+        return $ret;
+    }
 
 
 	public function addImagesToPackage($savedFiles, $package_id){

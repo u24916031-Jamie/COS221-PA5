@@ -3,12 +3,12 @@
 	session_start();
 	
 	require_once("./server/database.php");
-	require_once("./server/loginapi.php");
-	require_once("./server/logoutapi.php");
-	require_once("./server/registerapi.php");
+	require_once("./server/login.php");
+	require_once("./server/logout.php");
+	require_once("./server/register.php");
 	require_once("./server/searchServices.php");
 	require_once("./server/searchPackages.php");
-	require_once("./server/reviewapi.php");
+	require_once("./server/review.php");
 	require_once("./server/createPackage.php");
 	require_once("./server/getPackage.php");
 	require_once("./server/bookPackage.php");

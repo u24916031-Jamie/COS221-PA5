@@ -14,7 +14,7 @@ function searchPackages($data)
         $order = "ASC";
     }
 
-    $allowed_sort = ["cost", "price", "rating"];
+    $allowed_sort = ["price", "rating"];
     $sort = strtolower($sort);
     if (!in_array($sort, $allowed_sort)) {
         $sort = "price";

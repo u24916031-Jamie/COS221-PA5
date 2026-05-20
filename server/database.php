@@ -308,11 +308,12 @@ class Database {
 	
         if (!empty($params["services"])) {
             foreach ($params["services"] as $svc) {
-                $stmt = $this->conn->prepare("INSERT INTO SERVICE (Street, City, Code) VALUES (?, ?, ?)");
+                $stmt = $this->conn->prepare("INSERT INTO SERVICE (Street, City, Code, Type) VALUES (?, ?, ?, ?)");
                 $street = $svc['street'] ?? 'N/A';
                 $city = $svc['city'] ?? 'N/A';
                 $code = $svc['code'] ?? '0000';
-                $stmt->bind_param('sss', $street, $city, $code);
+				$type = $svc['type'];
+                $stmt->bind_param('ssss', $street, $city, $code, $type);
                 $stmt->execute();
                 $service_id = $this->conn->insert_id;
                 $stmt->close();
@@ -369,6 +370,117 @@ class Database {
 		$stmt->close();
 
 		
+
+	}
+
+	public function getAccomodation($service_id){
+		$stmt = $this->conn->prepare('SELECT s.street, s.city, s.code, s.type, a.name
+		FROM service s 
+		JOIN accomodation a ON s.service_id = a.service_id
+		WHERE service_id=?');
+		$stmt->bind_param('i', $package_id);
+		$stmt->execute();
+		$result = $stmt->get_result();
+		return $result->fetch_assoc();
+	}
+
+	public function getAttraction($service_id){
+		$stmt = $this->conn->prepare('SELECT s.street, s.city, s.code, s.type, a.name
+		FROM service s 
+		JOIN attraction a ON s.service_id = a.service_id
+		WHERE service_id=?');
+		$stmt->bind_param('i', $package_id);
+		$stmt->execute();
+		$result = $stmt->get_result();
+		return $result->fetch_assoc();
+	}
+
+	public function getDestination($service_id){
+	$stmt = $this->conn->prepare('SELECT s.street, s.city, s.code, s.type, d.description
+		FROM service s 
+		JOIN destination d ON s.service_id = d.service_id
+		WHERE service_id=?');
+		$stmt->bind_param('i', $package_id);
+		$stmt->execute();
+		$result = $stmt->get_result();
+		return $result->fetch_assoc();
+	}
+
+	public function restaurant($service_id){
+		$stmt = $this->conn->prepare('SELECT s.street, s.city, s.code, s.type, r.name
+		FROM service s 
+		JOIN restaurant r ON s.service_id = r.service_id
+		WHERE service_id=?');
+		$stmt->bind_param('i', $package_id);
+		$stmt->execute();
+		$result = $stmt->get_result();
+		return $result->fetch_assoc();
+	}
+
+	public function getFlight($service_id){
+		$stmt = $this->conn->prepare('SELECT s.street, s.city, s.code, s.type, f.flight_number
+		FROM service s 
+		JOIN flight f ON s.service_id = f.service_id
+		WHERE service_id=?');
+		$stmt->bind_param('i', $package_id);
+		$stmt->execute();
+		$result = $stmt->get_result();
+		return $result->fetch_assoc();
+	}
+
+
+	public function getPackage($package_id){
+		$stmt = $this->conn->prepare('SELECT p.name, p.price, p.description, p.target_id, ta.agency_name 
+		FROM package p
+		JOIN travel_agency ta ON p.package.user_id = ta.travel_agency.user_id 
+		WHERE package_id=?');
+		$stmt->bind_param('i', $package_id);
+		$stmt->execute();
+		$result = $stmt->get_result();
+		$packageInfo = $result->fetch_assoc();
+
+
+		$stmt = $this->conn->prepare('SELECT service_id, type
+		FROM includes JOIN service ON includes.service_id = service.service_id
+		WHERE package_id=?');
+		$stmt->bind_param('i', $package_id);
+		$stmt->execute();
+		$result = $stmt->get_result();
+
+
+
+		$services = [];
+
+		while($val = $result->fetch_assoc()){
+			switch($val["type"]){
+				case("Accomodation"):{
+					$services[] = getAccomodation($val["service_id"]);
+					break;
+				}
+				case("Attraction"):{
+					$services[] = getAttraction($val["service_id"]);
+					break;
+				}
+				case("Destination"):{
+					$services[] = getDestination($val["service_id"]);
+					break;
+				}
+				case("Flight"):{
+					$services[] = getFlight($val["service_id"]);
+					break;
+				}
+				case("Restaurant"):{
+					$services[] = getRestaurant($val["service_id"]);
+					break;
+				}
+			}
+		}
+
+		$ret = [
+			"packageInfo" => $packageInfo,
+			"services" => $services
+		];
+		return $ret;
 
 	}
 // edit package

@@ -1,5 +1,5 @@
 <?php
-
+require_once "database.php";
 
 
 function login($data){
@@ -51,16 +51,34 @@ function login($data){
 	$_SESSION["target_id"] = (isset($ret["target_id"])) ? $ret["target_id"]: null;
 
 	
-	header("HTTP/1.1 200 OK");
-	header("Content-Type: application/json");
-	$retdata = [
-		"status" => "success",
-		"timestamp" => time(),
-	];
+	// header("HTTP/1.1 200 OK");
+	// header("Content-Type: application/json");
+	// $retdata = [
+	// 	"status" => "success",
+	// 	"timestamp" => time(),
+	// ];
 			
-	echo json_encode($retdata);
+	// echo json_encode($retdata);
+  if($ret["user_type"] == "Travel Agency"){
+    header("Location: ../client/agentView.html");
+  }else if($ret["user_type"] == "Traveller"){
+    header("Location: ../traveller/browsePackage.php");
+  }
+  exit();
 }
 
+session_start();
+
+require_once "database.php";
+
+if($_SERVER["REQUEST_METHOD"] == "POST"){
+  $data = new stdClass();
+  $data->email = $_POST["email"];
+  $data->password = $_POST["password"];
+
+  login($data);
+
+}
 
 
 	?>

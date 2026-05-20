@@ -16,13 +16,13 @@
       
       <div class="right-section">
         <div class="login-card">
-          <form action="server/api.php" method="POST" enctype="multipart/form-data">
+          <form id="createPackageForm" enctype="multipart/form-data">
             <h3 style="text-align: center; width: 100%; margin-top: 0;">Create Single Package</h3>
             
             <div class="section-title">General Details</div>
-            <input type="text" name="packageName" placeholder="Package Name" required>
-            <input type="number" name="packagePrice" placeholder="Total Price (ZAR)" required>
-            <textarea name="packageDescription" placeholder="Package Description" required></textarea>
+            <input type="text" name="name" placeholder="Package Name" required>
+            <input type="number" name="price" placeholder="Total Price (ZAR)" required>
+            <textarea name="description" placeholder="Package Description" required></textarea>
 
             <div class="section-title">Media</div>
             <div class="image-upload-container">
@@ -37,18 +37,17 @@
             <div class="section-title" style="margin-top: 30px;">Services Builder</div>
             <div id="services-container" style="width: 100%;"></div>
 
-            <button type="button" id="add-service-btn" style="background: rgba(255, 255, 255, 0.2); border: 2px dashed rgba(255, 255, 255, 0.5); color: white; padding: 10px 20px; border-radius: 15px; cursor: pointer; margin: 15px auto; display: block; width: 85%; font-family: 'Inter', sans-serif; transition: 0.3s;">
+            <button type="button" id="add-service-btn" style="background: rgba(255, 255, 255, 0.2); border: 2px dashed rgba(255, 255, 255, 0.5); color: white; padding: 10px 20px; border-radius: 15px; cursor: pointer; margin: 15px auto; display: block; width: 85%; transition: 0.3s;">
               + Add New Service
             </button>
 
-            <input type="hidden" name="type" value="addPackageSingle">
+            <input type="hidden" name="type" value="createPackage">
 
             <button type="submit" class="submit" style="margin-top: 40px; width: 85%;">Publish Single Package</button>
           </form>
         </div>
       </div>
     </div>
-
     <script src="../js/addPackageSingle.js"></script>
   </body>
 </html>

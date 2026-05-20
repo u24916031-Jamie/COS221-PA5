@@ -14,7 +14,7 @@ class Database {
 	}
 	private function __construct() { 
 		$host = 'localhost'; //change host to the local or sm
-    $env = parse_ini_file('.env');
+    $env = parse_ini_file('.env.example');
     $username = $env['USERNAME'];
     $password = $env['PASSWORD'];
     $dbname = $env['DBNAME'];
@@ -203,90 +203,123 @@ class Database {
 
 
 	}
+		//added sort on destination and package name
+	public function searchPackages($params) 
+	{
+        $searchString = "%" . ($params["search"] ?? "") . "%";
+        
+        $sortParam = strtolower($params["sort"] ?? "price");
+        $sortString = "P.Price";
+        if ($sortParam === "rating") {
+            $sortString = "Rating";
+        }
+        $orderParam = strtoupper($params["order"] ?? "ASC");
+        $orderString = ($orderParam === "DESC") ? "DESC" : "ASC";
 
-	// search packages ( search[description], sort[cost, rating], order[ASC or DESC])
-	public function searchPackages($params){
-		$sql = 'SELECT P.package_id, P.name, P.price, P.description, AVG(R.rating) AS rating FROM package P LEFT JOIN review R on P.target_id = R.target_id GROUP BY P.package_id HAVING P.description LIKE ? ORDERBY ? ?'; 
-		
-		$searchString = "";
-		if (isset($params["search"])){
-			$searchString = $params["search"];
-		}
-		$sortString = "package_id";
-		if (isset($params["sort"])){
-			$sortString = $params["sort"];
-		}
-		$orderString = "ASC";
-		if (isset($params["order"])){
-			$orderString = $params["order"];
-		}
-		$stmt = $this->conn->prepare($sql);
-		$stmt->bind_param('sss',"%".$searchString."%", $sortString, $orderSQL);
-
-
-		$stmt->execute();
-		$result = $stmt->get_result();
-		if (!$result) {
-			echo("Query failed: " . $this->conn->error);
-		}
-		$ret = [];
-		while($val = $result->fetch_assoc()){
-			$ret[] = $val;
-		}
-		return $ret;
-
-	}
-
-
-
-	public function addImagesToPackage($savedFiles, $package_id){
-		if (count($savedFiles) == 0){
-			return;
-		}
-		$SQL = 'INSERT INTO package_images (package_id, image) VALUES (?, ?)';
-
-		$mask = "ss";
-		$inputs = [];
-
-		$inputs[] = $package_id;
-		$inputs[] = $savedFiles[0];
-
-		for ($i = 1;$i < count($savedFiles); $i++){
-			$mask .= "ss";
-
-			$inputs[] = $package_id;
-			$inputs[] = $savedFiles[i];
-			$SQL .= ", (?, ?)";			
-			
-
-		
-		}
-
-
-		$stmt = $this->conn->prepare($SQL);
-
-		$stmt->bind_param($mask, ...$inputs);
-		$stmt->execute();
-	}
-
+        $sql = "SELECT P.Package_id, P.Name, P.Price, P.Description, 
+                 IFNULL(AVG(R.Rating), 0) AS Rating,
+                 (SELECT Image FROM PACKAGE_IMAGES PI WHERE PI.Package_id = P.Package_id LIMIT 1) AS Image
+                FROM PACKAGE P 
+                LEFT JOIN REVIEW R ON P.Target_id = R.Target_id 
+                LEFT JOIN INCLUDES INC ON P.Package_id = INC.Package_id
+                LEFT JOIN SERVICE S ON INC.Service_id = S.Service_id
+                LEFT JOIN DESTINATION D ON S.Service_id = D.Service_id
+                WHERE P.Name LIKE ? 
+                 OR P.Description LIKE ? 
+                 OR S.City LIKE ?
+                 OR D.Description LIKE ?
+                GROUP BY P.Package_id, P.Name, P.Price, P.Description
+                ORDER BY $sortString $orderString";
+        
+        $stmt = $this->conn->prepare($sql);
+        
+        if (!$stmt) {
+            error_log("Prepare failed: " . $this->conn->error);
+            return [];
+        }
+        $stmt->bind_param('ssss', $searchString, $searchString, $searchString, $searchString);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        if (!$result) {
+            error_log("Execute failed: " . $stmt->error);
+            return [];
+        }
+        $ret = [];
+        while($val = $result->fetch_assoc()){
+            $ret[] = $val;
+        }
+        return $ret;
+    }
+	//added more detail to how the services needs to be stored
 	public function createPackage($params){
-		$stmt = $this->conn->prepare('INSERT INTO review_target (target_id, target_type) VALUES (NULL, ?)');
-		$stmt->bind_param('s', "Package");
-		$ret = $stmt->execute();
-		$stmt->close();
-		$target_id = $this->conn->insert_id;
+        $stmt = $this->conn->prepare('INSERT INTO REVIEW_TARGET (Target_Type) VALUES (?)');
+        $type = "Package";
+        $stmt->bind_param('s', $type);
+        $stmt->execute();
+        $target_id = $this->conn->insert_id;
+        $stmt->close();
 
-		$stmt = $this->conn->prepare('INSERT INTO package(name, price, description, user_id, target_id VALUES (?, ?, ?, ?, ?)');
-		$stmt->bind_param('sssss', $params["name"], $params["price"], $params["description"], $_SESSION["user_id"], $target_id);
-		$ret = $stmt->execute();
-		$stmt->close();
-		$package_id = $this->conn->insert_id;
+        $stmt = $this->conn->prepare('INSERT INTO PACKAGE (Name, Price, Description, User_id, Target_id) VALUES (?, ?, ?, ?, ?)');
+        $stmt->bind_param('sdssi', $params["name"], $params["price"], $params["description"], $_SESSION["user_id"], $target_id);
+        $stmt->execute();
+        $package_id = $this->conn->insert_id;
+        $stmt->close();
 
-		$this->addImagesToPackage($params["images"], $package_id);
-		
+        if (!empty($params["images"])) {
+            $this->addImagesToPackage($params["images"], $package_id);
+        }
 
-	}
-// create package
+        if (!empty($params["services"])) {
+            foreach ($params["services"] as $svc) {
+                $stmt = $this->conn->prepare("INSERT INTO SERVICE (Street, City, Code) VALUES (?, ?, ?)");
+                $street = $svc['street'] ?? 'N/A';
+                $city = $svc['city'] ?? 'N/A';
+                $code = $svc['code'] ?? '0000';
+                $stmt->bind_param('sss', $street, $city, $code);
+                $stmt->execute();
+                $service_id = $this->conn->insert_id;
+                $stmt->close();
+
+                $type = strtolower($svc['type']);
+                if ($type === 'accommodation' || $type === 'attraction' || $type === 'restaurant') {
+                    $table = strtoupper($type);
+                    $stmt = $this->conn->prepare("INSERT INTO $table (Service_id, Name) VALUES (?, ?)");
+                    $stmt->bind_param('is', $service_id, $svc['name']);
+                    $stmt->execute(); 
+                    $stmt->close();
+                } elseif ($type === 'flight') {
+                    $stmt = $this->conn->prepare("INSERT INTO FLIGHT (Service_id, Flight_number) VALUES (?, ?)");
+                    $stmt->bind_param('is', $service_id, $svc['flight_number']);
+                    $stmt->execute(); 
+                    $stmt->close();
+                } elseif ($type === 'destination') {
+                    $stmt = $this->conn->prepare("INSERT INTO DESTINATION (Service_id, Description) VALUES (?, ?)");
+                    $stmt->bind_param('is', $service_id, $svc['description']);
+                    $stmt->execute(); 
+                    $stmt->close();
+                }
+
+                $stmt = $this->conn->prepare("INSERT INTO INCLUDES (Package_id, Service_id) VALUES (?, ?)");
+                $stmt->bind_param('ii', $package_id, $service_id);
+                $stmt->execute();
+                $stmt->close();
+            }
+        }
+        return true;
+    }
+	//made the images easier to store with forloop
+    public function addImagesToPackage($savedFiles, $package_id){
+        if (empty($savedFiles)){
+            return;
+        }
+        
+        $stmt = $this->conn->prepare('INSERT INTO PACKAGE_IMAGES (Package_id, Image) VALUES (?, ?)');
+        foreach ($savedFiles as $img) {
+            $stmt->bind_param('is', $package_id, $img);
+            $stmt->execute();
+        }
+        $stmt->close();
+    }
 // edit package
 // delete package
 // create group trip

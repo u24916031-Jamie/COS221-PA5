@@ -217,17 +217,17 @@ class Database {
         $orderString = ($orderParam === "DESC") ? "DESC" : "ASC";
 
         $sql = "SELECT P.Package_id, P.Name, P.Price, P.Description, 
-                 IFNULL(AVG(R.Rating), 0) AS Rating,
-                 (SELECT Image FROM PACKAGE_IMAGES PI WHERE PI.Package_id = P.Package_id LIMIT 1) AS Image
+                       IFNULL(AVG(R.Rating), 0) AS Rating,
+                       (SELECT Image FROM PACKAGE_IMAGES PI WHERE PI.Package_id = P.Package_id LIMIT 1) AS Image
                 FROM PACKAGE P 
                 LEFT JOIN REVIEW R ON P.Target_id = R.Target_id 
                 LEFT JOIN INCLUDES INC ON P.Package_id = INC.Package_id
                 LEFT JOIN SERVICE S ON INC.Service_id = S.Service_id
                 LEFT JOIN DESTINATION D ON S.Service_id = D.Service_id
                 WHERE P.Name LIKE ? 
-                 OR P.Description LIKE ? 
-                 OR S.City LIKE ?
-                 OR D.Description LIKE ?
+                   OR P.Description LIKE ? 
+                   OR S.City LIKE ?
+                   OR D.Description LIKE ?
                 GROUP BY P.Package_id, P.Name, P.Price, P.Description
                 ORDER BY $sortString $orderString";
         
@@ -250,7 +250,38 @@ class Database {
         }
         return $ret;
     }
-	//added more detail to how the services needs to be stored
+
+
+	public function addImagesToPackage($savedFiles, $package_id){
+		if (count($savedFiles) == 0){
+			return;
+		}
+		$SQL = 'INSERT INTO package_images (package_id, image) VALUES (?, ?)';
+
+		$mask = "ss";
+		$inputs = [];
+
+		$inputs[] = $package_id;
+		$inputs[] = $savedFiles[0];
+
+		for ($i = 1;$i < count($savedFiles); $i++){
+			$mask .= "ss";
+
+			$inputs[] = $package_id;
+			$inputs[] = $savedFiles[i];
+			$SQL .= ", (?, ?)";			
+			
+
+		
+		}
+
+
+		$stmt = $this->conn->prepare($SQL);
+
+		$stmt->bind_param($mask, ...$inputs);
+		$stmt->execute();
+	}
+
 	public function createPackage($params){
         $stmt = $this->conn->prepare('INSERT INTO REVIEW_TARGET (Target_Type) VALUES (?)');
         $type = "Package";

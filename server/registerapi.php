@@ -56,7 +56,7 @@ function register($data){
 
 
 	$salt = bin2hex(random_bytes(8));
-	$hashed_pass = hash('sha256', $data["email"] . $salt);
+	$hashed_pass = hash('sha256', $data["password"] . $salt);
 
 	
 	$newUserData = [

@@ -14,10 +14,10 @@ class Database {
 	}
 	private function __construct() { 
 		$host = 'localhost'; //change host to the local or sm
-    $env = parse_ini_file('.env.example');
-    $username = $env['USERNAME'];
-    $password = $env['PASSWORD'];
-    $dbname = $env['DBNAME'];
+		$env = parse_ini_file('.env.example');
+		$username = $env['USERNAME'];
+		$password = $env['PASSWORD'];
+		$dbname = $env['DBNAME'];
 
 		mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 		$this->conn = new mysqli($host, $username, $password);
@@ -98,6 +98,26 @@ class Database {
 
 		
 	}
+	public function tripExists($trip_id, $package_id){
+		$stmt = $this->conn->prepare('SELECT 1 FROM group_trip WHERE trip_id=? AND package_id=?');
+		$stmt->bind_param('ii', $trip_id, $package_id);
+
+		$stmt->execute();
+		$result = $stmt->get_result();
+		return $result->fetch_assoc() != null;
+
+		
+	}
+	public function codeExists($code_name){
+		$stmt = $this->conn->prepare('SELECT 1 FROM promo_code WHERE code_name=?');
+		$stmt->bind_param('s', $code_name);
+
+		$stmt->execute();
+		$result = $stmt->get_result();
+		return $result->fetch_assoc() != null;
+
+		
+	}
 
 	public function loginUser($email, $password){
 		$stmt = $this->conn->prepare('SELECT salt FROM user WHERE email=?');
@@ -105,13 +125,15 @@ class Database {
 
 		$stmt->execute();
 		$result = $stmt->get_result();
-    //added check for non-existing emails&users
+   		//added check for non-existing emails&users
 		$row = $result->fetch_assoc();
     
-    if($row==null)
-      return false;
+		if($row==null){
 
-    $salt = $row["salt"];
+			return false;
+		}
+
+		$salt = $row["salt"];
 		if ($salt == null){
 			return false;
 		}
@@ -204,8 +226,7 @@ class Database {
 
 	}
 		//added sort on destination and package name
-	public function searchPackages($params) 
-	{
+	public function searchPackages($params) {
         $searchString = "%" . ($params["search"] ?? "") . "%";
         
         $sortParam = strtolower($params["sort"] ?? "price");
@@ -300,6 +321,30 @@ class Database {
             $this->addImagesToPackage($params["images"], $package_id);
         }
 
+	}
+	public function bookPackage($params){
+		$code_id = null;
+		$trip_id = null;
+		if (isset($params["trip_id"])){
+			$trip_id = $params["trip_id"];
+		}
+		if (isset($params["code_name"])){
+			$stmt = $this->conn->prepare('SELECT code_id FROM promo_code WHERE code_name=?');
+			$stmt->bind_param('s', $params["code_name"]);
+			$stmt->execute();
+			$result = $stmt->get_result();
+			$code_id = ($result->fetch_assoc())["code_id"];
+			$stmt->close();
+		}
+
+		$stmt = $this->conn->prepare('INSERT INTO books (user_id, package_id, code_id, trip_id) VALUES (?, ?, ?, ?)');
+		$stmt->bind_param('iiii', $_SESSION["user_id"], $params["package_id"], $code_id, $trip_id);
+		$ret = $stmt->execute();
+		$stmt->close();
+
+		
+
+	}
         if (!empty($params["services"])) {
             foreach ($params["services"] as $svc) {
                 $stmt = $this->conn->prepare("INSERT INTO SERVICE (Street, City, Code) VALUES (?, ?, ?)");

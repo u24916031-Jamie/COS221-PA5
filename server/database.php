@@ -429,7 +429,7 @@ class Database {
 	}
 
 
-	public function viewPackage($package_id){
+	public function getPackage($package_id){
 		$stmt = $this->conn->prepare('SELECT p.name, p.price, p.description, p.target_id, ta.agency_name 
 		FROM package p
 		JOIN travel_agency ta ON p.package.user_id = ta.travel_agency.user_id 

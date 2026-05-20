@@ -10,7 +10,7 @@
 	require_once("./server/searchPackages.php");
 	require_once("./server/reviewapi.php");
 	require_once("./server/createPackage.php");
-	require_once("./server/viewPackage.php");
+	require_once("./server/getPackage.php");
 	require_once("./server/bookPackage.php");
 	
 	
@@ -64,8 +64,8 @@
 				createPackage($data);
 				break;
 
-			case "viewPackage":
-				viewPackage($data);
+			case "getPackage":
+				getPackage($data);
 				break;
 			case "bookPackage":
 				bookPackage($data);

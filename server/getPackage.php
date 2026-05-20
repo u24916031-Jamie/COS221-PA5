@@ -1,6 +1,6 @@
 <?php
 
-function viewPackage($data){
+function getPackage($data){
 	$db = Database::instance();
 
 	if(!isset($data["package_id"])){
@@ -19,7 +19,7 @@ function viewPackage($data){
 	}
 
 
-	$ret = $db->viewPackage($data);
+	$ret = $db->getPackage($data);
 
 
 	

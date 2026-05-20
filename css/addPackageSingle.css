@@ -222,6 +222,6 @@ input[type="file"].hidden-upload {
 }
 
 .address-grid input {
-    flex: 1; /* Makes them share space equally */
+    flex: 1;
     margin: 0 !important;
 }

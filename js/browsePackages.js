@@ -1,4 +1,5 @@
-async function fetchPackages() {
+async function fetchPackages() 
+{
     try {
         const response = await fetch('../api.php', 
           {
@@ -15,7 +16,9 @@ async function fetchPackages() {
         const result = JSON.parse(textResponse);
         if (result.status === 'success') {
             renderPackages(result.data);
-        } else {
+        } 
+        else 
+            {
             console.error('API Error:', result.data);
         }
     } 
@@ -39,8 +42,10 @@ function renderPackages(data)
         const price = pkg.Price ? parseFloat(pkg.Price) : 0;
         const rating = pkg.Rating ? parseFloat(pkg.Rating).toFixed(1) : '0.0';
         const image = pkg.Image || '../img/tripBack.avif';
-        const name = pkg.Name || 'Unnamed Package';
-        const desc = pkg.Description || 'No description provided.';
+        const name = pkg.Name || pkg.name || 'Unnamed Package';
+        const desc = pkg.Description || pkg.description || 'No description provided.';
+        
+        const packageId = pkg.Package_id
 
         const card = document.createElement('div');
         card.className = 'package-card';
@@ -51,21 +56,24 @@ function renderPackages(data)
                 <h3>${name}</h3>
                 <p class="package-price">ZAR ${price.toLocaleString()}</p>
                 <p class="package-desc">${desc}</p>
-                <button class="book-btn">View Details</button>
+                <button class="book-btn" onclick="window.location.href='packageDetails.php?id=${packageId}'">
+                    View Details
+                </button>
             </div>
         `;
         grid.appendChild(card);
     });
 }
-
-//dynamic searching
+//type search
 let searchTimeout;
-document.getElementById('locationSearch').addEventListener('input', function() {
+document.getElementById('locationSearch').addEventListener('input', function() 
+{
     clearTimeout(searchTimeout);
     searchTimeout = setTimeout(fetchPackages, 300);
 });
-//click to search not really nessesary but added anyway
-document.getElementById('searchBtn').addEventListener('click', function(e) {
+//button search
+document.getElementById('searchBtn').addEventListener('click', function(e) 
+{
     e.preventDefault();
     fetchPackages();
 });

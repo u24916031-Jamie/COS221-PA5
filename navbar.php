@@ -1,10 +1,24 @@
 <nav class="navbar">
   <div class="nav-group">
     <a href="/COS221-PA5-main/index.html">Home</a>
-    <a href="/COS221-PA5-main/traveller/browsePackages.php">Browse</a>
+    <a href="/COS221-PA5-main/traveller/browsePackage.php">Browse</a>
+    
+    <?php 
+    if (session_status() === PHP_SESSION_NONE) {
+        session_start();
+    }
+
+    if (isset($_SESSION["user_type"]) && $_SESSION["user_type"] === "Travel Agency") 
+      {
+        echo '<a href="/COS221-PA5-main/agent/addSinglePackage.php">Add Package</a>';
+    }
+    ?>
   </div>
+  
   <div class="nav-group">
-    <span class="user-display">Welcome</span>
-    <a href="/COS221-PA5-main/logout.php" class="logout-btn">Logout</a>
+    <span class="user-display">
+        <?php echo isset($_SESSION["user_type"]) ? "Welcome, " . $_SESSION["user_type"] : "Welcome"; ?>
+    </span>
+    <a href="/COS221-PA5-main/server/logoutapi.php" class="logout-btn">Logout</a>
   </div>
 </nav>

@@ -244,20 +244,23 @@ class Database {
         $orderParam = strtoupper($params["order"] ?? "ASC");
         $orderString = ($orderParam === "DESC") ? "DESC" : "ASC";
 
-        $sql = "SELECT P.Package_id, P.Name, P.Price, P.Description, 
-                       IFNULL(AVG(R.Rating), 0) AS Rating,
-                       (SELECT Image FROM PACKAGE_IMAGES PI WHERE PI.Package_id = P.Package_id LIMIT 1) AS Image
-                FROM PACKAGE P 
-                LEFT JOIN REVIEW R ON P.Target_id = R.Target_id 
-                LEFT JOIN INCLUDES INC ON P.Package_id = INC.Package_id
-                LEFT JOIN SERVICE S ON INC.service_id = S.service_id
-                LEFT JOIN DESTINATION D ON S.service_id = D.service_id
-                WHERE P.Name LIKE ? 
-                   OR P.Description LIKE ? 
-                   OR S.City LIKE ?
-                   OR D.Description LIKE ?
-                GROUP BY P.Package_id, P.Name, P.Price, P.Description
-                ORDER BY $sortString $orderString";
+       $sql = "SELECT p.Package_id, p.Name, p.Price, p.Description, 
+                   IFNULL(AVG(r.Rating), 0) AS Rating,
+                   ta.Agency_name,
+                   (SELECT pi.Image FROM package_images pi WHERE pi.Package_id = p.Package_id LIMIT 1) AS Image
+            FROM package p 
+            LEFT JOIN review r ON p.Target_id = r.Target_id 
+            LEFT JOIN travel_agency ta ON p.User_id = ta.User_id
+            LEFT JOIN includes inc ON p.Package_id = inc.Package_id
+            LEFT JOIN service s ON inc.service_id = s.service_id
+            LEFT JOIN destination d ON s.service_id = d.service_id
+            WHERE p.Name LIKE ? 
+               OR p.Description LIKE ? 
+               OR s.City LIKE ?
+               OR d.Description LIKE ?
+               OR ta.Agency_name LIKE ?
+            GROUP BY p.Package_id, p.Name, p.Price, p.Description, ta.Agency_name
+            ORDER BY $sortString $orderString";
         
         $stmt = $this->conn->prepare($sql);
         
@@ -265,7 +268,8 @@ class Database {
             error_log("Prepare failed: " . $this->conn->error);
             return [];
         }
-        $stmt->bind_param('ssss', $searchString, $searchString, $searchString, $searchString);
+        
+        $stmt->bind_param('sssss', $searchString, $searchString, $searchString, $searchString, $searchString);
         $stmt->execute();
         $result = $stmt->get_result();
         if (!$result) {
@@ -276,6 +280,7 @@ class Database {
         while($val = $result->fetch_assoc()){
             $ret[] = $val;
         }
+        $stmt->close();
         return $ret;
     }
 

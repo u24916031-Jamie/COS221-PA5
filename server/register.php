@@ -61,7 +61,7 @@ function register($data){
 	
 	$newUserData = [
 		// user
-		"user_type"=>$data["User_type"],
+		"user_type"=>$data["user_type"],
 		"password_hash"=>$hashed_pass,
 		"email"=>$data["email"],
 		"cell"=>$data["cell"],

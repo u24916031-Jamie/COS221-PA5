@@ -64,7 +64,8 @@ class Database {
 
 			}else if ($user_type == "Travel Agency"){
 				$stmt = $this->conn->prepare('INSERT INTO review_target (target_id, target_type) VALUES (NULL, ?)');
-				$stmt->bind_param('s', "Travel Agency");
+        $fillInType = "Travel Agency";
+				$stmt->bind_param('s', $fillInType);
 				$ret = $stmt->execute();
 				$stmt->close();
 				$target_id = $this->conn->insert_id;
@@ -88,13 +89,19 @@ class Database {
 	}
 
 	public function emailExists($userEmail){
-		$stmt = $this->conn->prepare('SELECT 1 FROM user WHERE email=?');
+		$stmt = $this->conn->prepare('SELECT 1 FROM user WHERE Email=?');
+    $email = $userEmail;
 		$stmt->bind_param('s', $email);
-		$email = $userEmail;
+		
 
 		$stmt->execute();
 		$result = $stmt->get_result();
-		return $result->fetch_assoc() != null;
+
+    $exists = ($result->fetch_assoc() !== null);
+    $stmt->close();
+
+
+		return $exists;
 
 		
 	}

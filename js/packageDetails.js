@@ -19,11 +19,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     fetchPackageData(packageId);
 
-    async function fetchPackageData(id) 
-    {
+    async function fetchPackageData(id) {
         try {
-            const response = await fetch('../api.php', 
-                {
+            const response = await fetch('../api.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ type: 'viewPackage', package_id: id })
@@ -37,25 +35,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const result = JSON.parse(textResponse);
 
-            if (result.status === 'success' && result.data && result.data.packageInfo) 
-                {
+            if (result.status === 'success' && result.data && result.data.packageInfo) {
                 populateUI(result.data.packageInfo, result.data.services, result.data.images, id);
-            } 
-            else 
-                {
+            } else {
                 showError("Package Not Found", result.data || "The requested package does not exist.");
             }
 
-        } 
-        catch (error) 
-        {
+        } catch (error) {
             console.error("Fetch Error:", error);
             showError("Connection Error", "Failed to communicate with the server.");
         }
     }
 
-    function populateUI(pkg, services, images, id) 
-    { 
+    function populateUI(pkg, services, images, id) { 
         packageImages = images;
         
         document.getElementById('pkgIdBadge').textContent = `ID: ${id}`;
@@ -64,15 +56,13 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('pkgDescription').textContent = pkg.description || 'No description available.';
         
         const priceNum = parseFloat(pkg.price || 0);
-        document.getElementById('pkgPrice').textContent = priceNum.toLocaleString('en-ZA', 
-            {
+        document.getElementById('pkgPrice').textContent = priceNum.toLocaleString('en-ZA', {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2
         });
 
         const slidesContainer = document.getElementById('slides');
-        if (packageImages && packageImages.length > 0) 
-            {
+        if (packageImages && packageImages.length > 0) {
             packageImages.forEach((img, index) => {
                 const slide = document.createElement('img');
                 slide.src = img;
@@ -80,21 +70,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 slidesContainer.appendChild(slide);
             });
             startAutoSlide(); 
-        } 
-        else 
-            {
+        } else {
             slidesContainer.innerHTML = '<div class="no-image">No images available</div>';
         }
 
         const servicesContainer = document.getElementById('pkgServices');
         servicesContainer.innerHTML = ''; 
 
-        if (!services || services.length === 0) 
-            {
+        if (!services || services.length === 0) {
             servicesContainer.innerHTML = '<p class="text-body">No specific services added yet.</p>';
-        } 
-        else 
-            {
+        } else {
             services.forEach(srv => {
                 const serviceName = srv.name || srv.flight_number || srv.description || 'Service Included';
                 const serviceCard = document.createElement('div');
@@ -112,14 +97,12 @@ document.addEventListener('DOMContentLoaded', () => {
         packageContent.classList.remove('hidden');
     }
 
-    function startAutoSlide() 
-    {
+    function startAutoSlide() {
         clearInterval(slideInterval); 
         slideInterval = setInterval(() => changeSlide(1), 5000);
     }
 
-    window.changeSlide = function(n) 
-    {
+    window.changeSlide = function(n) {
         const slides = document.querySelectorAll('.slide');
         if (slides.length === 0) return;
         

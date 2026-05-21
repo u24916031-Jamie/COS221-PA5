@@ -48,6 +48,6 @@
             </div>
         </div>
     </div>
-    <script src="../js/addPackageSingle.js"></script>
+    <script src="./js/addPackageSingle.js"></script>
 </body>
 </html>

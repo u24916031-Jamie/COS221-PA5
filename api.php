@@ -12,7 +12,7 @@
 	require_once("./server/createPackage.php");
 	require_once("./server/getPackage.php");
 	require_once("./server/bookPackage.php");
-	
+	require_once("./server/viewPackage.php");
 	
 	$db = Database::instance();
 	$method = $_SERVER["REQUEST_METHOD"];
@@ -69,6 +69,9 @@
 				break;
 			case "bookPackage":
 				bookPackage($data);
+				break;
+			case "viewPackage":
+				viewPackage($data);
 				break;
 
 

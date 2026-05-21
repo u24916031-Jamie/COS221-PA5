@@ -4,8 +4,11 @@ require_once "database.php";
 
 function login($data){
 	$db = Database::instance();
+
+  $email = isset($data['email'])?$data['email']:'';
+  $password = isset($data['password'])?$data['password']:'';
 	
-	if (!$db->loginUser($data->email, $data->password)){
+	if (!$db->loginUser($email, $password)){
 		// email / password not matching
 		$retdata = [
 			"status" => "fail",
@@ -22,50 +25,33 @@ function login($data){
 		echo json_encode($retdata);
 		return;
 	}
-	// login
+	//get details to populate session once user logged in
 
-
-	// user_id, user_type, password_hash, email, salt, cell
-
-	// if user_type == "Traveller"
-	// fname, lname, id_number
-
-	//if user_type == "Travel Agency"
-	// agency_name, contact_fname, contact_lname, target_id
-	$ret = $db->getUserData($data->email);
+	$ret = $db->getUserData($email);
 	$_SESSION["loggedin"] = true;
-	$_SESSION["user_id"] = $ret["user_id"];
-	$_SESSION["user_type"] = $ret["user_type"];
-	$_SESSION["email"] =  $ret["email"];
-	$_SESSION["cell"] = $ret["cell"];
+	$_SESSION["user_id"] = $ret["User_id"];
+	$_SESSION["User_type"] = $ret["User_type"];
+	$_SESSION["email"] =  $ret["Email"];
+	$_SESSION["cell"] = $ret["Cell"];
 
 	// if user_type == "Traveller"
-	$_SESSION["fname"] = (isset($ret["fname"])) ? $ret["fname"]: null;
-	$_SESSION["lname"] = (isset($ret["lname"])) ? $ret["lname"]: null;
-	$_SESSION["id_number"] = (isset($ret["id_number"])) ? $ret["id_number"]: null;
+	$_SESSION["fname"] = (isset($ret["Fname"])) ? $ret["Fname"]: null;
+	$_SESSION["lname"] = (isset($ret["Lname"])) ? $ret["Lname"]: null;
+	$_SESSION["id_number"] = (isset($ret["Id_number"])) ? $ret["Id_number"]: null;
 
 	// if user_type == "Travel Agency"
-	$_SESSION["agency_name"] = (isset($ret["agency_name"])) ? $ret["agency_name"]: null;
-	$_SESSION["contact_fname"] = (isset($ret["contact_fname"])) ? $ret["contact_fname"]: null;
-	$_SESSION["contact_lname"] = (isset($ret["contact_lname"])) ? $ret["contact_lname"]: null;
-	$_SESSION["target_id"] = (isset($ret["target_id"])) ? $ret["target_id"]: null;
+	$_SESSION["agency_name"] = (isset($ret["Agency_name"])) ? $ret["Agency_name"]: null;
+	$_SESSION["contact_fname"] = (isset($ret["Contact_Fname"])) ? $ret["Contact_Fname"]: null;
+	$_SESSION["contact_lname"] = (isset($ret["Contact_Lname"])) ? $ret["Contact_Lname"]: null;
+	$_SESSION["target_id"] = (isset($ret["Target_id"])) ? $ret["Target_id"]: null;
 
-	
-	// header("HTTP/1.1 200 OK");
-	// header("Content-Type: application/json");
-	// $retdata = [
-	// 	"status" => "success",
-	// 	"timestamp" => time(),
-	// ];
-			
-	// echo json_encode($retdata);
-  if($ret["user_type"] == "Travel Agency"){
-    header("Location: ../client/agentView.html");
-  }else if($ret["user_type"] == "Traveller"){
-    header("Location: ../traveller/browsePackage.php");
+	//redirect based on type
+  if($ret["User_type"] == "Travel Agency"){
+    header("Location: ./client/agentView.html");
+  }else if($ret["User_type"] == "Traveller"){
+    header("Location: ./traveller/browsePackage.php");
   }
   exit();
 }
 
-
-	?>
+?>

@@ -13,6 +13,16 @@ async function fetchPackages()
             })
         });
         const textResponse = await response.text();
+
+        if (textResponse.includes("<br />") || textResponse.includes("<b>")) {
+            const grid = document.getElementById('packagesGrid');
+            grid.innerHTML = `<div style="color:red; padding:20px; background:#fff0f0; border:1px solid red; width:100%;">
+                <h3>⚠️ PHP Backend Error Encountered:</h3>
+                <code>${textResponse}</code>
+            </div>`;
+            return;
+        }
+        
         const result = JSON.parse(textResponse);
         if (result.status === 'success') {
             renderPackages(result.data);
@@ -44,6 +54,7 @@ function renderPackages(data)
         const image = pkg.Image || '../img/tripBack.avif';
         const name = pkg.Name || pkg.name || 'Unnamed Package';
         const desc = pkg.Description || pkg.description || 'No description provided.';
+        const agencyName = pkg.Agency_name || 'Unknown Agency';
         
         const packageId = pkg.Package_id
 
@@ -52,6 +63,7 @@ function renderPackages(data)
         card.innerHTML = `
             <img src="${image}" class="package-img" alt="${name}">
             <div class="package-info">
+                <h3>${agencyName}</h3>
                 <span class="rating-badge">★ ${rating}</span>
                 <h3>${name}</h3>
                 <p class="package-price">ZAR ${price.toLocaleString()}</p>

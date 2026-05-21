@@ -70,3 +70,9 @@ input[type="email"]
 a{
   color: #1F80FF;
 }
+
+
+
+button[type="submit"]{
+	cursor:pointer;
+}

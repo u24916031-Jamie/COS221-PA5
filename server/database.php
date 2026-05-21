@@ -14,7 +14,7 @@ class Database {
 	}
 	private function __construct() { 
 		$host = 'localhost'; //change host to the local or sm
-		$env = parse_ini_file('.env.example');
+		$env = parse_ini_file('.env');
 		$username = $env['USERNAME'];
 		$password = $env['PASSWORD'];
 		$dbname = $env['DBNAME'];

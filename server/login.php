@@ -51,6 +51,18 @@ function login($data){
   }else if($ret["User_type"] == "Traveller"){
     header("Location: ./traveller/browsePackage.php");
   }
+  
+	header("HTTP/1.1 200 Ok");
+	header("Content-Type: application/json");
+	$retdata = [
+		"status" => "success",
+		"timestamp" => time(),
+
+	];
+			
+	echo json_encode($retdata);
+
+
   exit();
 }
 

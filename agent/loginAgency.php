@@ -2,7 +2,7 @@
 <html>
   <head>
     <title>Tripistry Agency Login</title>
-    <link rel="stylesheet" href="css/homePage.css" />
+    <link rel="stylesheet" href="../css/homePage.css" />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" />
   </head>
   <body>
@@ -13,7 +13,7 @@
       <div class = "right-section">
         <div class = "login-card">
           <h3>Login</h3>
-          <form action = "server/loginapi.php" method = "POST">
+          <form action = "../server/loginapi.php" method = "POST">
             <input type = "email" name="email" placeholder = "Email" required>
             <input type = "password" name="password" placeholder = "Password" required>
             <button type="submit" class="agent-button">Enter dashboard</button>

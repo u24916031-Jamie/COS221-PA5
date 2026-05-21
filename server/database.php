@@ -243,8 +243,8 @@ class Database {
                 FROM PACKAGE P 
                 LEFT JOIN REVIEW R ON P.Target_id = R.Target_id 
                 LEFT JOIN INCLUDES INC ON P.Package_id = INC.Package_id
-                LEFT JOIN SERVICE S ON INC.Service_id = S.Service_id
-                LEFT JOIN DESTINATION D ON S.Service_id = D.Service_id
+                LEFT JOIN SERVICE S ON INC.service_id = S.service_id
+                LEFT JOIN DESTINATION D ON S.service_id = D.service_id
                 WHERE P.Name LIKE ? 
                    OR P.Description LIKE ? 
                    OR S.City LIKE ?
@@ -305,15 +305,13 @@ class Database {
             $this->addImagesToPackage($params["images"], $package_id);
         }
 
-	
         if (!empty($params["services"])) {
             foreach ($params["services"] as $svc) {
-                $stmt = $this->conn->prepare("INSERT INTO SERVICE (Street, City, Code, Type) VALUES (?, ?, ?, ?)");
+                $stmt = $this->conn->prepare("INSERT INTO SERVICE (Street, City, Code) VALUES (?, ?, ?)");
                 $street = $svc['street'] ?? 'N/A';
                 $city = $svc['city'] ?? 'N/A';
                 $code = $svc['code'] ?? '0000';
-				$type = $svc['type'];
-                $stmt->bind_param('ssss', $street, $city, $code, $type);
+                $stmt->bind_param('sss', $street, $city, $code);
                 $stmt->execute();
                 $service_id = $this->conn->insert_id;
                 $stmt->close();
@@ -321,24 +319,24 @@ class Database {
                 $type = strtolower($svc['type']);
                 if ($type === 'accommodation' || $type === 'attraction' || $type === 'restaurant') {
                     $table = strtoupper($type);
-                    $stmt = $this->conn->prepare("INSERT INTO $table (Service_id, Name) VALUES (?, ?)");
+                    $stmt = $this->conn->prepare("INSERT INTO $table (service_id, Name) VALUES (?, ?)");
                     $stmt->bind_param('is', $service_id, $svc['name']);
                     $stmt->execute(); 
                     $stmt->close();
                 } elseif ($type === 'flight') {
-                    $stmt = $this->conn->prepare("INSERT INTO FLIGHT (Service_id, Flight_number) VALUES (?, ?)");
+                    $stmt = $this->conn->prepare("INSERT INTO FLIGHT (service_id, Flight_number) VALUES (?, ?)");
                     $stmt->bind_param('is', $service_id, $svc['flight_number']);
                     $stmt->execute(); 
                     $stmt->close();
                 } elseif ($type === 'destination') {
-                    $stmt = $this->conn->prepare("INSERT INTO DESTINATION (Service_id, Description) VALUES (?, ?)");
+                    $stmt = $this->conn->prepare("INSERT INTO DESTINATION (service_id, Description) VALUES (?, ?)");
                     $stmt->bind_param('is', $service_id, $svc['description']);
                     $stmt->execute(); 
                     $stmt->close();
                 }
 
-                $stmt = $this->conn->prepare("INSERT INTO INCLUDES (Package_id, Service_id) VALUES (?, ?)");
-                $stmt->bind_param('ii', $package_id, $service_id);
+                $stmt = $this->conn->prepare("INSERT INTO INCLUDES (Package_id, service_id, type) VALUES (?, ?, ?)");
+                $stmt->bind_param('iis', $package_id, $service_id, $svc['type']);
                 $stmt->execute();
                 $stmt->close();
             }
@@ -346,9 +344,6 @@ class Database {
         return true;
     }
 
-
-
-	
 	public function bookPackage($params){
 		$code_id = null;
 		$trip_id = null;
@@ -369,16 +364,14 @@ class Database {
 		$ret = $stmt->execute();
 		$stmt->close();
 
-		
-
 	}
 
 	public function getAccomodation($service_id){
 		$stmt = $this->conn->prepare('SELECT s.street, s.city, s.code, s.type, a.name
 		FROM service s 
 		JOIN accomodation a ON s.service_id = a.service_id
-		WHERE service_id=?');
-		$stmt->bind_param('i', $package_id);
+		WHERE s.service_id=?');
+		$stmt->bind_param('i', $service_id);
 		$stmt->execute();
 		$result = $stmt->get_result();
 		return $result->fetch_assoc();
@@ -388,8 +381,8 @@ class Database {
 		$stmt = $this->conn->prepare('SELECT s.street, s.city, s.code, s.type, a.name
 		FROM service s 
 		JOIN attraction a ON s.service_id = a.service_id
-		WHERE service_id=?');
-		$stmt->bind_param('i', $package_id);
+		WHERE s.service_id=?');
+		$stmt->bind_param('i', $service_id);
 		$stmt->execute();
 		$result = $stmt->get_result();
 		return $result->fetch_assoc();
@@ -399,19 +392,19 @@ class Database {
 	$stmt = $this->conn->prepare('SELECT s.street, s.city, s.code, s.type, d.description
 		FROM service s 
 		JOIN destination d ON s.service_id = d.service_id
-		WHERE service_id=?');
-		$stmt->bind_param('i', $package_id);
+		WHERE s.service_id=?');
+		$stmt->bind_param('i', $service_id);
 		$stmt->execute();
 		$result = $stmt->get_result();
 		return $result->fetch_assoc();
 	}
 
-	public function restaurant($service_id){
-		$stmt = $this->conn->prepare('SELECT s.street, s.city, s.code, s.type, r.name
+	public function getRestaurant($service_id){
+		$stmt = $this->conn->prepare('SELECT s.street, s.city, s.code, r.name
 		FROM service s 
 		JOIN restaurant r ON s.service_id = r.service_id
-		WHERE service_id=?');
-		$stmt->bind_param('i', $package_id);
+		WHERE s.service_id=?');
+		$stmt->bind_param('i', $service_id);
 		$stmt->execute();
 		$result = $stmt->get_result();
 		return $result->fetch_assoc();
@@ -421,8 +414,8 @@ class Database {
 		$stmt = $this->conn->prepare('SELECT s.street, s.city, s.code, s.type, f.flight_number
 		FROM service s 
 		JOIN flight f ON s.service_id = f.service_id
-		WHERE service_id=?');
-		$stmt->bind_param('i', $package_id);
+		WHERE s.service_id=?');
+		$stmt->bind_param('i', $service_id);
 		$stmt->execute();
 		$result = $stmt->get_result();
 		return $result->fetch_assoc();
@@ -432,53 +425,58 @@ class Database {
 	public function getPackage($package_id){
 		$stmt = $this->conn->prepare('SELECT p.name, p.price, p.description, p.target_id, ta.agency_name 
 		FROM package p
-		JOIN travel_agency ta ON p.package.user_id = ta.travel_agency.user_id 
-		WHERE package_id=?');
+		LEFT JOIN travel_agency ta ON p.user_id = ta.user_id
+		WHERE p.package_id=?');
 		$stmt->bind_param('i', $package_id);
 		$stmt->execute();
 		$result = $stmt->get_result();
 		$packageInfo = $result->fetch_assoc();
 
+		$stmt = $this->conn->prepare('SELECT Image FROM PACKAGE_IMAGES WHERE Package_id = ?');
+        $stmt->bind_param('i', $package_id);
+        $stmt->execute();
+        $imgResult = $stmt->get_result();
+        $images = [];
+        while($row = $imgResult->fetch_assoc()) {
+            $images[] = $row['Image'];
+        }
+        $stmt->close();
 
-		$stmt = $this->conn->prepare('SELECT service_id, type
-		FROM includes JOIN service ON includes.service_id = service.service_id
-		WHERE package_id=?');
+		$stmt = $this->conn->prepare('SELECT i.service_id, i.type
+		FROM includes i 
+		JOIN service s ON i.service_id = s.service_id
+		WHERE i.package_id=?');
+
 		$stmt->bind_param('i', $package_id);
 		$stmt->execute();
 		$result = $stmt->get_result();
 
-
-
 		$services = [];
 
 		while($val = $result->fetch_assoc()){
-			switch($val["type"]){
-				case("Accomodation"):{
-					$services[] = getAccomodation($val["service_id"]);
-					break;
-				}
-				case("Attraction"):{
-					$services[] = getAttraction($val["service_id"]);
-					break;
-				}
-				case("Destination"):{
-					$services[] = getDestination($val["service_id"]);
-					break;
-				}
-				case("Flight"):{
-					$services[] = getFlight($val["service_id"]);
-					break;
-				}
-				case("Restaurant"):{
-					$services[] = getRestaurant($val["service_id"]);
-					break;
-				}
-			}
-		}
+            switch(strtolower($val["type"])){
+                case("accommodation"): 
+                    $services[] = $this->getAccomodation($val["service_id"]);
+                    break;
+                case("attraction"):   
+                    $services[] = $this->getAttraction($val["service_id"]);
+                    break;
+                case("destination"):  
+                    $services[] = $this->getDestination($val["service_id"]);
+                    break;
+                case("flight"):      
+                    $services[] = $this->getFlight($val["service_id"]);
+                    break;
+                case("restaurant"): 
+                    $services[] = $this->getRestaurant($val["service_id"]);
+                    break;
+            }
+        }
 
 		$ret = [
 			"packageInfo" => $packageInfo,
-			"services" => $services
+			"services" => $services,
+			"images" => $images
 		];
 		return $ret;
 

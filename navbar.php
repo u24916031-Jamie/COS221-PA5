@@ -8,9 +8,9 @@
         session_start();
     }
 
-    if (isset($_SESSION["user_type"]) && $_SESSION["user_type"] === "Travel Agency") 
-      {
+    if (isset($_SESSION["user_type"]) && $_SESSION["user_type"] === "Travel Agency") {
         echo '<a href="/COS221-PA5-main/agent/addSinglePackage.php">Add Package</a>';
+        echo '<a href="/COS221-PA5-main/agent/agentPackages.php">My Packages</a>';
     }
     ?>
   </div>

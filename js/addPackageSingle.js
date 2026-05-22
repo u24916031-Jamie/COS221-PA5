@@ -1,24 +1,33 @@
-// multiple image selector and preview
 document.getElementById('package-images-single').addEventListener('change', function(event) {
     const previewContainer = document.getElementById('image-preview-container-single');
     previewContainer.innerHTML = ''; 
-    const files = event.target.files;
-    Array.from(files).forEach(file => {
+    
+    const files = Array.from(event.target.files).slice(0, 10); 
+    
+    files.forEach(file => {
         if (!file.type.startsWith('image/')) return; 
         const reader = new FileReader();
         reader.onload = function(e) {
             const img = document.createElement('img');
             img.src = e.target.result;
             img.classList.add('preview-image');
+            img.onclick = () => img.remove();
             previewContainer.appendChild(img);
         }
         reader.readAsDataURL(file);
     });
 });
 
-// add as many services as you want
-document.getElementById('add-service-btn').addEventListener('click', function() {
+document.getElementById('add-service-btn').addEventListener('click', function() 
+{
     const container = document.getElementById('services-container');
+    
+    if (container.children.length >= 10) 
+        {
+        alert("Maximum of 10 services allowed.");
+        return;
+    }
+    
     const index = container.children.length;
     
     const block = document.createElement('div');
@@ -89,7 +98,7 @@ document.getElementById('createPackageForm').addEventListener('submit', async fu
         const result = JSON.parse(textResponse);
         if (result.status === 'success') {
             alert('Package Created Successfully!');
-            window.location.reload(); 
+            window.location.href = 'agentPackages.php'; 
         } else {
             alert('Error: ' + (result.data || 'Unknown error'));
         }

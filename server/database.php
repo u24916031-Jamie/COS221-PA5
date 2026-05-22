@@ -533,12 +533,13 @@ class Database {
             foreach ($params["services"] as $svc) 
 			{
                 if(empty($svc['type'])) continue; 
-                $stmt = $this->conn->prepare("INSERT INTO SERVICE (Street, City, Code) VALUES (?, ?, ?)");
+                
+                $stmt = $this->conn->prepare("INSERT INTO SERVICE (Street, City, Code, Type) VALUES (?, ?, ?, ?)");
                 $street = $svc['street'] ?? 'N/A';
                 $city = $svc['city'] ?? 'N/A';
                 $code = $svc['code'] ?? '0000';
 				
-                $stmt->bind_param('sss', $street, $city, $code);
+                $stmt->bind_param('ssss', $street, $city, $code, $svc['type']);
                 $stmt->execute();
                 $service_id = $this->conn->insert_id;
                 $stmt->close();
@@ -547,28 +548,28 @@ class Database {
                 if ($type === 'accommodation' || $type === 'attraction' || $type === 'restaurant') 
 				{
                     $table = strtoupper($type);
-                    $stmt = $this->conn->prepare("INSERT INTO $table (service_id, Name) VALUES (?, ?)");
+                    $stmt = $this->conn->prepare("INSERT INTO $table (Service_id, Name) VALUES (?, ?)");
                     $stmt->bind_param('is', $service_id, $svc['name']);
                     $stmt->execute(); 
                     $stmt->close();
                 } 
 				elseif ($type === 'flight') 
 				{
-                    $stmt = $this->conn->prepare("INSERT INTO FLIGHT (service_id, Flight_number) VALUES (?, ?)");
+                    $stmt = $this->conn->prepare("INSERT INTO FLIGHT (Service_id, Flight_number) VALUES (?, ?)");
                     $stmt->bind_param('is', $service_id, $svc['flight_number']);
                     $stmt->execute(); 
                     $stmt->close();
                 } 
 				elseif ($type === 'destination') 
 				{
-                    $stmt = $this->conn->prepare("INSERT INTO DESTINATION (service_id, Description) VALUES (?, ?)");
+                    $stmt = $this->conn->prepare("INSERT INTO DESTINATION (Service_id, Description) VALUES (?, ?)");
                     $stmt->bind_param('is', $service_id, $svc['description']);
                     $stmt->execute(); 
                     $stmt->close();
                 }
 
-                $stmt = $this->conn->prepare("INSERT INTO INCLUDES (Package_id, Service_id, type) VALUES (?, ?, ?)");
-                $stmt->bind_param('iis', $package_id, $service_id, $svc['type']);
+                $stmt = $this->conn->prepare("INSERT INTO INCLUDES (Package_id, Service_id) VALUES (?, ?)");
+                $stmt->bind_param('ii', $package_id, $service_id);
                 $stmt->execute();
                 $stmt->close();
             }

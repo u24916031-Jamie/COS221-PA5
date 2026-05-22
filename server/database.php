@@ -318,39 +318,37 @@ class Database {
         }
 
         if (!empty($params["services"])) {
-            foreach ($params["services"] as $svc) {
-                $stmt = $this->conn->prepare("INSERT INTO SERVICE (Street, City, Code) VALUES (?, ?, ?)");
-                $street = $svc['street'] ?? 'N/A';
-                $city = $svc['city'] ?? 'N/A';
-                $code = $svc['code'] ?? '0000';
-                $stmt->bind_param('sss', $street, $city, $code);
-                $stmt->execute();
-                $service_id = $this->conn->insert_id;
-                $stmt->close();
+        foreach ($params["services"] as $svc) 
+			{
+            $stmt = $this->conn->prepare("INSERT INTO SERVICE (Street, City, Code, Type) VALUES (?, ?, ?, ?)");
+            $stmt->bind_param('ssss', $svc['street'], $svc['city'], $svc['code'], $svc['type']);
+            $stmt->execute();
+            $service_id = $this->conn->insert_id;
+            $stmt->close();
 
                 $type = strtolower($svc['type']);
                 if ($type === 'accommodation' || $type === 'attraction' || $type === 'restaurant') {
                     $table = strtoupper($type);
-                    $stmt = $this->conn->prepare("INSERT INTO $table (service_id, Name) VALUES (?, ?)");
+                    $stmt = $this->conn->prepare("INSERT INTO $table (Service_id, Name) VALUES (?, ?)");
                     $stmt->bind_param('is', $service_id, $svc['name']);
                     $stmt->execute(); 
                     $stmt->close();
                 } elseif ($type === 'flight') {
-                    $stmt = $this->conn->prepare("INSERT INTO FLIGHT (service_id, Flight_number) VALUES (?, ?)");
+                    $stmt = $this->conn->prepare("INSERT INTO FLIGHT (Service_id, Flight_number) VALUES (?, ?)");
                     $stmt->bind_param('is', $service_id, $svc['flight_number']);
                     $stmt->execute(); 
                     $stmt->close();
                 } elseif ($type === 'destination') {
-                    $stmt = $this->conn->prepare("INSERT INTO DESTINATION (service_id, Description) VALUES (?, ?)");
+                    $stmt = $this->conn->prepare("INSERT INTO DESTINATION (Service_id, Description) VALUES (?, ?)");
                     $stmt->bind_param('is', $service_id, $svc['description']);
                     $stmt->execute(); 
                     $stmt->close();
                 }
 
-                $stmt = $this->conn->prepare("INSERT INTO INCLUDES (Package_id, service_id, type) VALUES (?, ?, ?)");
-                $stmt->bind_param('iis', $package_id, $service_id, $svc['type']);
-                $stmt->execute();
-                $stmt->close();
+                $stmt = $this->conn->prepare("INSERT INTO INCLUDES (Package_id, Service_id) VALUES (?, ?)");
+				$stmt->bind_param('ii', $package_id, $service_id);
+				$stmt->execute();
+				$stmt->close();
             }
         }
         return true;
@@ -435,14 +433,15 @@ class Database {
 
 
 	public function getPackage($package_id){
-		$stmt = $this->conn->prepare('SELECT p.name, p.price, p.description, p.target_id, ta.agency_name 
-		FROM package p
-		LEFT JOIN travel_agency ta ON p.user_id = ta.user_id
-		WHERE p.package_id=?');
+		$stmt = $this->conn->prepare('SELECT p.Name as name, p.Price as price, p.Description as description, p.Target_id as target_id, ta.Agency_name as agency_name 
+		FROM PACKAGE p
+		LEFT JOIN TRAVEL_AGENCY ta ON p.User_id = ta.User_id
+		WHERE p.Package_id=?');
 		$stmt->bind_param('i', $package_id);
 		$stmt->execute();
 		$result = $stmt->get_result();
 		$packageInfo = $result->fetch_assoc();
+        $stmt->close();
 
 		$stmt = $this->conn->prepare('SELECT Image FROM PACKAGE_IMAGES WHERE Package_id = ?');
         $stmt->bind_param('i', $package_id);
@@ -454,48 +453,220 @@ class Database {
         }
         $stmt->close();
 
-		$stmt = $this->conn->prepare('SELECT i.service_id, i.type
-		FROM includes i 
-		JOIN service s ON i.service_id = s.service_id
-		WHERE i.package_id=?');
+		$stmt = $this->conn->prepare('SELECT i.Service_id as service_id, s.Type as type, s.Street as street, s.City as city, s.Code as code, 
+           acc.Name as acc_name, fli.Flight_number as flight_number, dest.Description as dest_desc
+			FROM INCLUDES i 
+			JOIN SERVICE s ON i.Service_id = s.Service_id
+			LEFT JOIN ACCOMMODATION acc ON s.Service_id = acc.Service_id
+			LEFT JOIN FLIGHT fli ON s.Service_id = fli.Service_id
+			LEFT JOIN DESTINATION dest ON s.Service_id = dest.Service_id
+			WHERE i.Package_id=?');
 
-		$stmt->bind_param('i', $package_id);
-		$stmt->execute();
-		$result = $stmt->get_result();
+			$stmt->bind_param('i', $package_id);
+			$stmt->execute();
+			$result = $stmt->get_result();
 
-		$services = [];
+			$services = [];
+			while($val = $result->fetch_assoc()){
+				$serviceData = [
+					'type' => $val['type'],
+					'street' => $val['street'],
+					'city' => $val['city'],
+					'code' => $val['code'],
+					'name' => $val['acc_name'] ?? $val['flight_number'] ?? $val['dest_desc']
+				];
+				$services[] = $serviceData;
+			}
+			$stmt->close();
 
-		while($val = $result->fetch_assoc()){
-            switch(strtolower($val["type"])){
-                case("accommodation"): 
-                    $services[] = $this->getAccomodation($val["service_id"]);
-                    break;
-                case("attraction"):   
-                    $services[] = $this->getAttraction($val["service_id"]);
-                    break;
-                case("destination"):  
-                    $services[] = $this->getDestination($val["service_id"]);
-                    break;
-                case("flight"):      
-                    $services[] = $this->getFlight($val["service_id"]);
-                    break;
-                case("restaurant"): 
-                    $services[] = $this->getRestaurant($val["service_id"]);
-                    break;
-            }
-        }
-
-		$ret = [
-			"packageInfo" => $packageInfo,
-			"services" => $services,
-			"images" => $images
-		];
-		return $ret;
-
+			return ["packageInfo" => $packageInfo, "services" => $services, "images" => $images];
 	}
 	
-// edit package
-// delete package
+	public function updatePackage($params) 
+	{
+        $package_id = $params['package_id'];
+        $user_id = $_SESSION['user_id'];
+        
+        $stmt = $this->conn->prepare('UPDATE package SET name=?, price=?, description=? WHERE package_id=? AND user_id=?');
+        $stmt->bind_param('sdsii', $params["name"], $params["price"], $params["description"], $package_id, $user_id);
+        $ret = $stmt->execute();
+        $stmt->close();
+        if (!$ret) return false;
+
+        $stmt = $this->conn->prepare('DELETE FROM package_images WHERE package_id = ?');
+        $stmt->bind_param('i', $package_id);
+        $stmt->execute();
+        $stmt->close();
+
+        if (!empty($params["existing_images"])) 
+		{
+            $this->addImagesToPackage($params["existing_images"], $package_id);
+        }
+        if (!empty($params["images"])) 
+		{
+            $this->addImagesToPackage($params["images"], $package_id);
+        }
+
+        if (isset($params["services"])) 
+		{
+            $stmt = $this->conn->prepare('SELECT service_id FROM includes WHERE package_id = ?');
+            $stmt->bind_param('i', $package_id);
+            $stmt->execute();
+            $servicesResult = $stmt->get_result();
+            $stmt->close();
+
+            $stmt = $this->conn->prepare('DELETE FROM includes WHERE package_id = ?');
+            $stmt->bind_param('i', $package_id);
+            $stmt->execute();
+            $stmt->close();
+            
+            while($row = $servicesResult->fetch_assoc()) {
+                $sid = $row['service_id'];
+                $this->conn->query("DELETE FROM accommodation WHERE service_id = $sid");
+                $this->conn->query("DELETE FROM attraction WHERE service_id = $sid");
+                $this->conn->query("DELETE FROM restaurant WHERE service_id = $sid");
+                $this->conn->query("DELETE FROM flight WHERE service_id = $sid");
+                $this->conn->query("DELETE FROM destination WHERE service_id = $sid");
+                $this->conn->query("DELETE FROM service WHERE service_id = $sid");
+            }
+
+            foreach ($params["services"] as $svc) 
+			{
+                if(empty($svc['type'])) continue; 
+                $stmt = $this->conn->prepare("INSERT INTO SERVICE (Street, City, Code) VALUES (?, ?, ?)");
+                $street = $svc['street'] ?? 'N/A';
+                $city = $svc['city'] ?? 'N/A';
+                $code = $svc['code'] ?? '0000';
+				
+                $stmt->bind_param('sss', $street, $city, $code);
+                $stmt->execute();
+                $service_id = $this->conn->insert_id;
+                $stmt->close();
+
+                $type = strtolower($svc['type']);
+                if ($type === 'accommodation' || $type === 'attraction' || $type === 'restaurant') 
+				{
+                    $table = strtoupper($type);
+                    $stmt = $this->conn->prepare("INSERT INTO $table (service_id, Name) VALUES (?, ?)");
+                    $stmt->bind_param('is', $service_id, $svc['name']);
+                    $stmt->execute(); 
+                    $stmt->close();
+                } 
+				elseif ($type === 'flight') 
+				{
+                    $stmt = $this->conn->prepare("INSERT INTO FLIGHT (service_id, Flight_number) VALUES (?, ?)");
+                    $stmt->bind_param('is', $service_id, $svc['flight_number']);
+                    $stmt->execute(); 
+                    $stmt->close();
+                } 
+				elseif ($type === 'destination') 
+				{
+                    $stmt = $this->conn->prepare("INSERT INTO DESTINATION (service_id, Description) VALUES (?, ?)");
+                    $stmt->bind_param('is', $service_id, $svc['description']);
+                    $stmt->execute(); 
+                    $stmt->close();
+                }
+
+                $stmt = $this->conn->prepare("INSERT INTO INCLUDES (Package_id, Service_id, type) VALUES (?, ?, ?)");
+                $stmt->bind_param('iis', $package_id, $service_id, $svc['type']);
+                $stmt->execute();
+                $stmt->close();
+            }
+        }
+        return true;
+    }
+	public function deletePackage($package_id, $user_id) 
+	{
+        $stmt = $this->conn->prepare('SELECT target_id FROM package WHERE package_id = ? AND user_id = ?');
+        $stmt->bind_param('ii', $package_id, $user_id);
+        $stmt->execute();
+        $res = $stmt->get_result()->fetch_assoc();
+        $stmt->close();
+        if ($res == null) 
+		{
+            return false;
+        }
+        $target_id = $res['target_id'];
+
+        $stmt = $this->conn->prepare('DELETE FROM books WHERE package_id = ?');
+        $stmt->bind_param('i', $package_id);
+        $stmt->execute();
+        $stmt->close();
+        
+        $stmt = $this->conn->prepare('DELETE FROM group_trip WHERE package_id = ?');
+        $stmt->bind_param('i', $package_id);
+        $stmt->execute();
+        $stmt->close();
+
+        $stmt = $this->conn->prepare('DELETE FROM package_images WHERE package_id = ?');
+        $stmt->bind_param('i', $package_id);
+        $stmt->execute();
+        $stmt->close();
+
+        $stmt = $this->conn->prepare('SELECT service_id FROM includes WHERE package_id = ?');
+        $stmt->bind_param('i', $package_id);
+        $stmt->execute();
+        $servicesResult = $stmt->get_result();
+        $stmt->close();
+        
+        $stmt = $this->conn->prepare('DELETE FROM includes WHERE package_id = ?');
+        $stmt->bind_param('i', $package_id);
+        $stmt->execute();
+        $stmt->close();
+        
+        while($row = $servicesResult->fetch_assoc()) 
+		{
+            $sid = $row['service_id'];
+            $this->conn->query("DELETE FROM accommodation WHERE service_id = $sid");
+            $this->conn->query("DELETE FROM attraction WHERE service_id = $sid");
+            $this->conn->query("DELETE FROM restaurant WHERE service_id = $sid");
+            $this->conn->query("DELETE FROM flight WHERE service_id = $sid");
+            $this->conn->query("DELETE FROM destination WHERE service_id = $sid");
+            $this->conn->query("DELETE FROM service WHERE service_id = $sid");
+        }
+
+        if ($target_id) 
+		{
+            $stmt = $this->conn->prepare('DELETE FROM review WHERE target_id = ?');
+            $stmt->bind_param('i', $target_id);
+            $stmt->execute();
+            $stmt->close();
+        }
+
+        $stmt = $this->conn->prepare('DELETE FROM package WHERE package_id = ?');
+        $stmt->bind_param('i', $package_id);
+        $ret = $stmt->execute();
+        $stmt->close();
+
+        if ($target_id) 
+		{
+            $stmt = $this->conn->prepare('DELETE FROM review_target WHERE target_id = ?');
+            $stmt->bind_param('i', $target_id);
+            $stmt->execute();
+            $stmt->close();
+        }
+        
+        return $ret;
+    }
+	public function getAgentPackages($user_id) 
+	{
+		$stmt = $this->conn->prepare("
+			SELECT P.Package_id, P.Name, P.Price, P.Description,
+			 (SELECT Image FROM PACKAGE_IMAGES PI WHERE PI.Package_id = P.Package_id LIMIT 1) AS Image
+			FROM PACKAGE P 
+			WHERE P.User_id = ?
+		");
+		$stmt->bind_param('i', $user_id);
+		$stmt->execute();
+		$result = $stmt->get_result();
+		
+		$ret = [];
+		while($val = $result->fetch_assoc())
+		{
+			$ret[] = $val;
+		}
+		return $ret;
+	}
 // create group trip
 }
 

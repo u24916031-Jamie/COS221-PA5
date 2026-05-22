@@ -13,6 +13,9 @@
 	require_once("./server/getPackage.php");
 	require_once("./server/bookPackage.php");
 	require_once("./server/viewPackage.php");
+	require_once("./server/getAgentPackages.php");
+	require_once("./server/deletePackage.php");
+	require_once("./server/updatePackage.php");
 	
 	$db = Database::instance();
 	$method = $_SERVER["REQUEST_METHOD"];
@@ -72,6 +75,15 @@
 				break;
 			case "viewPackage":
 				viewPackage($data);
+				break;
+			case "getAgentPackages":
+				getAgentPackages($data);
+				break;
+			case "deletePackage":
+				deletePackage($data);
+				break;
+			case "updatePackage":
+				updatePackage($data);
 				break;
 
 

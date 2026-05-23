@@ -1,23 +1,28 @@
 <nav class="navbar">
   <div class="nav-group">
     <a href="/COS221-PA5-main/index.html">Home</a>
-    <a href="/COS221-PA5-main/traveller/browsePackage.php">Browse</a>
     
+         
     <?php 
     if (session_status() === PHP_SESSION_NONE) {
         session_start();
     }
-
-    if (isset($_SESSION["user_type"]) && $_SESSION["user_type"] === "Travel Agency") {
+         
+    $userType = $_SESSION["User_type"] ?? $_SESSION["user_type"] ?? null;
+    
+    if ($userType === "Travel Agency") {
         echo '<a href="/COS221-PA5-main/agent/addSinglePackage.php">Add Package</a>';
         echo '<a href="/COS221-PA5-main/agent/agentPackages.php">My Packages</a>';
+        echo '<a href="/COS221-PA5-main/agent/viewMyBookings.php">Bookings</a>'; 
+    } elseif ($userType === "Traveller") {
+        echo '<a href="/COS221-PA5-main/traveller/myBookings.php">My Bookings</a>';
+        echo '<a href="/COS221-PA5-main/traveller/browsePackage.php">Browse</a>';
     }
     ?>
   </div>
-  
   <div class="nav-group">
     <span class="user-display">
-        <?php echo isset($_SESSION["user_type"]) ? "Welcome, " . $_SESSION["user_type"] : "Welcome"; ?>
+        <?php echo isset($userType) ? "Welcome, " . htmlspecialchars($userType) : "Welcome"; ?>
     </span>
     <a href="/COS221-PA5-main/server/logoutapi.php" class="logout-btn">Logout</a>
   </div>

@@ -1,0 +1,28 @@
+.agency-banner {
+    background: rgba(255, 255, 255, 0.95);
+    padding: 40px;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    margin-bottom: 40px;
+    text-align: center;
+    width: 100%;
+    max-width: 1200px;
+}
+
+.agency-banner h1 {
+    color: #1F80FF;
+    margin: 0 0 10px 0;
+    font-size: 38px;
+}
+
+.agency-banner p {
+    color: #555;
+    font-size: 18px;
+    margin: 0;
+}
+
+#agencyEmail {
+    color: #666;
+    font-weight: bold;
+    margin-top: 5px;
+}

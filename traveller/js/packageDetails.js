@@ -1,23 +1,29 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const packageId = urlParams.get('id');
-
+    const packageId = new URLSearchParams(window.location.search).get('id');
+    const modal = document.getElementById('bookingModal');
+    const bookBtn = document.getElementById('bookBtn');
+    const closeBtn = document.getElementById('closeModal');
+    const bookingForm = document.getElementById('bookingForm');
     const loadingState = document.getElementById('loadingState');
-    const errorState = document.getElementById('errorState');
     const packageContent = document.getElementById('packageContent');
-    const errorMessage = document.getElementById('errorMessage');
-    const errorDescription = document.getElementById('errorDescription');
 
     let currentSlide = 0;
-    let packageImages = [];
     let slideInterval;
+    let basePrice = 0; 
 
-    if (!packageId) {
-        showError("Invalid Request", "No package ID was specified in the URL.");
-        return;
+    if (bookBtn) bookBtn.addEventListener('click', () => modal.classList.remove('hidden'));
+    if (closeBtn) closeBtn.addEventListener('click', () => modal.classList.add('hidden'));
+
+    const guestInput = document.querySelector('input[name="guests"]');
+    const submitBtn = document.querySelector('#bookingForm .btn-primary');
+    
+    if (guestInput && submitBtn) {
+        guestInput.addEventListener('input', (e) => {
+            const guests = parseInt(e.target.value) || 1;
+            const total = basePrice * guests;
+            submitBtn.textContent = `Confirm & Book (ZAR ${total.toLocaleString('en-ZA', {minimumFractionDigits: 2})})`;
+        });
     }
-
-    fetchPackageData(packageId);
 
     async function fetchPackageData(id) {
         try {
@@ -26,102 +32,86 @@ document.addEventListener('DOMContentLoaded', () => {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ type: 'viewPackage', package_id: id })
             });
-
-            const textResponse = await response.text();
-            
-            if (!textResponse.trim().startsWith('{')) {
-                throw new Error("Server returned an invalid format.");
-            }
-
-            const result = JSON.parse(textResponse);
-
-            if (result.status === 'success' && result.data && result.data.packageInfo) {
+            const result = await response.json();
+            if (result.status === 'success' && result.data) {
                 populateUI(result.data.packageInfo, result.data.services, result.data.images, id);
-            } else {
-                showError("Package Not Found", result.data || "The requested package does not exist.");
             }
-
         } catch (error) {
-            console.error("Fetch Error:", error);
-            showError("Connection Error", "Failed to communicate with the server.");
+            console.error(error);
         }
     }
 
-    function populateUI(pkg, services, images, id) { 
-        packageImages = images;
-        
+    function populateUI(pkg, services, images, id) {
         document.getElementById('pkgIdBadge').textContent = `ID: ${id}`;
-        document.getElementById('pkgTitle').textContent = pkg.name || 'Unnamed Package';
-        document.getElementById('pkgAgency').textContent = pkg.agency_name || 'Tripistry Verified';
-        document.getElementById('pkgDescription').textContent = pkg.description || 'No description available.';
+        document.getElementById('pkgTitle').textContent = pkg.name;
+        document.getElementById('pkgAgency').textContent = pkg.agency_name;
+        document.getElementById('pkgDescription').textContent = pkg.description;
         
-        const priceNum = parseFloat(pkg.price || 0);
-        document.getElementById('pkgPrice').textContent = priceNum.toLocaleString('en-ZA', {
+        basePrice = parseFloat(pkg.price || 0);
+        document.getElementById('pkgPrice').textContent = basePrice.toLocaleString('en-ZA', {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2
-        });
+        }) + " / person";
+
+        if (submitBtn) {
+            submitBtn.textContent = `Confirm & Book (ZAR ${basePrice.toLocaleString('en-ZA', {minimumFractionDigits: 2})})`;
+        }
 
         const slidesContainer = document.getElementById('slides');
-        if (packageImages && packageImages.length > 0) {
-            packageImages.forEach((img, index) => {
-                const slide = document.createElement('img');
-                slide.src = img;
-                slide.className = index === 0 ? 'slide active' : 'slide';
-                slidesContainer.appendChild(slide);
-            });
-            startAutoSlide(); 
-        } else {
-            slidesContainer.innerHTML = '<div class="no-image">No images available</div>';
-        }
+        slidesContainer.innerHTML = '';
+        images.forEach((img, index) => {
+            const slide = document.createElement('img');
+            slide.src = img;
+            slide.className = index === 0 ? 'slide active' : 'slide';
+            slidesContainer.appendChild(slide);
+        });
+        if (images.length > 0) slideInterval = setInterval(() => changeSlide(1), 5000);
 
         const servicesContainer = document.getElementById('pkgServices');
-        servicesContainer.innerHTML = ''; 
+        servicesContainer.innerHTML = '';
+        services.forEach(srv => {
+            const name = srv.name || srv.flight_number || srv.description || 'Service Included';
+            const serviceCard = document.createElement('div');
+            serviceCard.className = 'service-item';
+            serviceCard.innerHTML = `<span>${srv.type}</span><h3>${name}</h3>`;
+            servicesContainer.appendChild(serviceCard);
+        });
 
-        if (!services || services.length === 0) {
-            servicesContainer.innerHTML = '<p class="text-body">No specific services added yet.</p>';
-        } else {
-            services.forEach(srv => {
-                const serviceName = srv.name || srv.flight_number || srv.description || 'Service Included';
-                const serviceCard = document.createElement('div');
-                serviceCard.className = 'service-item';
-                serviceCard.innerHTML = `
-                    <span class="service-type">${srv.type}</span>
-                    <h3 class="service-name">${serviceName}</h3>
-                    <p class="service-location">📍 ${srv.street || ''} ${srv.city || 'Location unspecified'}</p>
-                `;
-                servicesContainer.appendChild(serviceCard);
-            });
-        }
-
-        loadingState.classList.add('hidden');
+        loadingState.style.display = 'none';
         packageContent.classList.remove('hidden');
     }
 
-    function startAutoSlide() {
-        clearInterval(slideInterval); 
-        slideInterval = setInterval(() => changeSlide(1), 5000);
-    }
-
-    window.changeSlide = function(n) {
+    window.changeSlide = (n) => {
         const slides = document.querySelectorAll('.slide');
         if (slides.length === 0) return;
-        
         slides[currentSlide].classList.remove('active');
         currentSlide = (currentSlide + n + slides.length) % slides.length;
         slides[currentSlide].classList.add('active');
-        
-        startAutoSlide(); 
     };
 
-    function showError(title, desc) {
-        loadingState.classList.add('hidden');
-        packageContent.classList.add('hidden');
-        errorMessage.textContent = title;
-        errorDescription.textContent = desc;
-        errorState.classList.remove('hidden');
-    }
+    bookingForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const data = Object.fromEntries(new FormData(bookingForm).entries());
+        data.type = 'bookPackage';
+        data.package_id = packageId;
 
-    document.getElementById('bookBtn').addEventListener('click', () => {
-        alert(`Booking flow initiated for Package ID: ${packageId}`);
+        try {
+            const response = await fetch('../api.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            const result = await response.json();
+            if (result.status === 'success') {
+                alert('Booking confirmed!');
+                window.location.href = 'myBookings.php';
+            } else {
+                alert('Booking error: ' + result.data);
+            }
+        } catch (err) {
+            alert('Could not process booking.');
+        }
     });
+
+    fetchPackageData(packageId);
 });

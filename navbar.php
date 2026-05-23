@@ -1,7 +1,7 @@
 <nav class="navbar">
   <div class="nav-group">
     <a href="/COS221-PA5-main/index.html">Home</a>
-    <a href="/COS221-PA5-main/traveller/browsePackage.php">Browse</a>
+    
          
     <?php 
     if (session_status() === PHP_SESSION_NONE) {
@@ -16,6 +16,7 @@
         echo '<a href="/COS221-PA5-main/agent/viewMyBookings.php">Bookings</a>'; 
     } elseif ($userType === "Traveller") {
         echo '<a href="/COS221-PA5-main/traveller/myBookings.php">My Bookings</a>';
+        echo '<a href="/COS221-PA5-main/traveller/browsePackage.php">Browse</a>';
     }
     ?>
   </div>

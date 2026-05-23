@@ -80,6 +80,6 @@
         </div>
     </main>
 
-    <script src="../js/packageDetails.js"></script>
+    <script src="./js/packageDetails.js"></script>
 </body>
 </html>

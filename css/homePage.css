@@ -70,3 +70,8 @@ input[type="email"]
 a{
   color: #1F80FF;
 }
+
+
+button{
+	cursor: pointer;
+}

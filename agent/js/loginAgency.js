@@ -7,18 +7,18 @@ function loginTraveller(e) {
 
 	const formData = new FormData(loginForm);
 
-	fetch('/COS221-PA5/api.php', {
+	fetch('../api.php', {
 		method: 'POST',
 		body: formData
 	})
 		.then(async response => {
-      const rawTextResponse = await response.text();
+			const rawTextResponse = await response.text();
 
-      try{
-        return JSON.parse(rawTextResponse);
-      }catch(err){
-        console.error("Incorrect response format", rawTextResponse);
-      }	
+			try {
+				return JSON.parse(rawTextResponse);
+			} catch (err) {
+				console.error("Incorrect response format", rawTextResponse);
+			}
 		})
 		.then(data => {
 			if (data.status === 'success') {

@@ -1,7 +1,7 @@
 <nav class="navbar">
   <div class="nav-group">
-    <a href="/COS221-PA5-main/index.html">Home</a>
-    <a href="/COS221-PA5-main/traveller/browsePackage.php">Browse</a>
+    <a href="/COS221-PA5/index.html">Home</a>
+    <a href="/COS221-PA5/traveller/browsePackage.php">Browse</a>
     
     <?php 
     if (session_status() === PHP_SESSION_NONE) {

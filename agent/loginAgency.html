@@ -13,7 +13,7 @@
       <div class = "right-section">
         <div class = "login-card">
           <h3>Login</h3>
-          <form action = "../api.php" method = "POST">
+          <form action = "../api.php" method = "POST" id ="loginFormAgency">
             <input type="hidden" name="type" value="login">
             
             <input type = "email" name="email" placeholder = "Email" required>
@@ -21,6 +21,7 @@
             <button type="submit" class="agent-button">Enter dashboard</button>
           </form>
             <p>Don't have an account?<a href = "signUpAgency.html"> Sign in </a></p>
+            <script src="./js/loginAgency.js"></script>
         </div>
       </div>
     </div>

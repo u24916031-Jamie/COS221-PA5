@@ -8,7 +8,7 @@
   </head>
 
   <div class = "login-card" style = "width: 500px">
-    <form action="../api.php" method="POST">
+    <form id="signUpAgency">
       <h3>Sign Up And Become a Agent!</h3>
         <input type="hidden" name="type" value="register">
         <input type="hidden" name="user_type" value="Travel Agency">
@@ -22,7 +22,9 @@
         
 
         <button type="submit" class="agent-button">Sign up</button>
-        <p>Already have an account?<a href = "loginAgency.html"> Sign in </a></p>
-    </form>
+      </form>
+      <script src = "./js/signUpAgency.js"></script>
+        
+    
   </div>
 </html>

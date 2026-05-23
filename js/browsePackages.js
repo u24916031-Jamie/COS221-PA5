@@ -17,12 +17,12 @@ async function fetchPackages()
         if (textResponse.includes("<br />") || textResponse.includes("<b>")) {
             const grid = document.getElementById('packagesGrid');
             grid.innerHTML = `<div style="color:red; padding:20px; background:#fff0f0; border:1px solid red; width:100%;">
-                <h3>⚠️ PHP Backend Error Encountered:</h3>
+                <h3>PHP Backend Error Encountered:</h3>
                 <code>${textResponse}</code>
             </div>`;
             return;
         }
-        
+
         const result = JSON.parse(textResponse);
         if (result.status === 'success') {
             renderPackages(result.data);

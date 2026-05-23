@@ -88,10 +88,10 @@
 
 
 
-				case "viewTravelAgency":
+				case "viewTravelAgency": break;
 
 
-				case "createGroupTrip":
+				case "createGroupTrip": break;
 
 
 				

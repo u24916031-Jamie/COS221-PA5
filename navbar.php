@@ -19,6 +19,6 @@
     <span class="user-display">
         <?php echo isset($_SESSION["user_type"]) ? "Welcome, " . $_SESSION["user_type"] : "Welcome"; ?>
     </span>
-    <a href="/COS221-PA5-main/server/logoutapi.php" class="logout-btn">Logout</a>
+    <a href="/COS221-PA5-main/traveller/logoutTraveller.php" class="logout-btn">Logout</a>
   </div>
 </nav>

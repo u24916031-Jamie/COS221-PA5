@@ -35,7 +35,7 @@ class Database {
 	}
 
 	public function addUser($userData){
-		$stmt = $this->conn->prepare('INSERT INTO user (user_id, user_type, password_hash, email, cell, salt) VALUES (NULL, ?, ?, ?, ?, ?)');
+		$stmt = $this->conn->prepare('INSERT INTO user (User_id, User_type, Password_hash, Email, Cell, salt) VALUES (NULL, ?, ?, ?, ?, ?)');
 		$stmt->bind_param('sssss', $user_type, $password_hash, $email, $cell, $salt);
 		
 		$user_type = $userData['user_type'];
@@ -50,7 +50,7 @@ class Database {
 			$user_id = $this->conn->insert_id;
 
 			if ($user_type == "Traveller"){
-				$stmt = $this->conn->prepare('INSERT INTO traveller (user_id, fname, lname, id_number) VALUES (?, ?, ?, ?)');
+				$stmt = $this->conn->prepare('INSERT INTO traveller (User_id, Fname, Lname,Id_number) VALUES (?, ?, ?, ?)');
 				$stmt->bind_param('ssss', $user_id, $fname, $lname, $id_number);
 				
 				$user_id = $user_id;
@@ -63,7 +63,7 @@ class Database {
 
 
 			}else if ($user_type == "Travel Agency"){
-				$stmt = $this->conn->prepare('INSERT INTO review_target (target_id, target_type) VALUES (NULL, ?)');
+				$stmt = $this->conn->prepare('INSERT INTO review_target (Target_id, Target_type) VALUES (NULL, ?)');
         $fillInType = "Travel Agency";
 				$stmt->bind_param('s', $fillInType);
 				$ret = $stmt->execute();
@@ -72,7 +72,7 @@ class Database {
 
 
 				
-				$stmt = $this->conn->prepare('INSERT INTO travel_agency (user_id, agency_name, contact_fname,contact_lname, target_id) VALUES (?, ?, ?, ?, ?)');
+				$stmt = $this->conn->prepare('INSERT INTO travel_agency (User_id, Agency_name, Contact_Fname,Contact_Lname, Target_id) VALUES (?, ?, ?, ?, ?)');
 				$stmt->bind_param('sssss', $user_id, $agency_name, $contact_fname, $contact_lname, $target_id);
 				
 				$user_id = $user_id;

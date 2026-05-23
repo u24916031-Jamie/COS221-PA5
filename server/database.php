@@ -14,7 +14,7 @@ class Database {
 	}
 	private function __construct() { 
 		$host = 'localhost'; //change host to the local or sm
-		$env = parse_ini_file('.env'); // create a .env file
+		$env = parse_ini_file('.env.example'); // create a .env file
 		$username = $env['USERNAME'];
 		$password = $env['PASSWORD'];
 		$dbname = $env['DBNAME'];
@@ -217,21 +217,37 @@ class Database {
 
 	}
 
-	public function review($params){
-		$stmt = $this->conn->prepare('INSERT INTO review (review_id, rating, comment, date, user_id, target_id) VALUES (NULL, ?, ?, ?, ?, ?)');
-		$stmt->bind_param('sssss', $rating, $comment, $date, $user_id, $target_id);
-		
-		$rating = $params['rating'];
-		$comment = $params['comment'];
-		$date = $params['date'];
-		$user_id = $_SESSION["user_id"];
-		$target_id = $params['target_id'];
+	public function review($params) {
+        $user_id = $_SESSION["user_id"];
+        $target_id = $params['target_id'];
 
-		$ret = $stmt->execute();
-		$stmt->close();
+        $stmt = $this->conn->prepare("
+            SELECT B.end_date 
+            FROM books B 
+            JOIN package P ON B.Package_id = P.Package_id 
+            WHERE B.User_id = ? AND P.Target_id = ? 
+            ORDER BY B.end_date DESC LIMIT 1
+        ");
+        $stmt->bind_param('ii', $user_id, $target_id);
+        $stmt->execute();
+        $res = $stmt->get_result()->fetch_assoc();
+        $stmt->close();
 
+        if (!$res || strtotime($res['end_date']) >= strtotime('today')) {
+            return false;
+        }
 
-	}
+        $stmt = $this->conn->prepare('INSERT INTO review (review_id, rating, comment, date, user_id, target_id) VALUES (NULL, ?, ?, ?, ?, ?)');
+        $rating = $params['rating'];
+        $comment = $params['comment'];
+        $date = $params['date'];
+
+        $stmt->bind_param('sssss', $rating, $comment, $date, $user_id, $target_id);
+        $ret = $stmt->execute();
+        $stmt->close();
+        
+        return $ret;
+    }
 		//added sort on destination and package name
 	public function searchPackages($params) {
         $searchString = "%" . ($params["search"] ?? "") . "%";
@@ -244,7 +260,7 @@ class Database {
         $orderParam = strtoupper($params["order"] ?? "ASC");
         $orderString = ($orderParam === "DESC") ? "DESC" : "ASC";
 
-       $sql = "SELECT p.Package_id, p.Name, p.Price, p.Description, 
+       $sql = "SELECT p.Package_id, p.User_id as Agency_id, p.Name, p.Price, p.Description, 
                    IFNULL(AVG(r.Rating), 0) AS Rating,
                    ta.Agency_name,
                    (SELECT pi.Image FROM package_images pi WHERE pi.Package_id = p.Package_id LIMIT 1) AS Image
@@ -283,6 +299,24 @@ class Database {
         $stmt->close();
         return $ret;
     }
+	
+	public function getPackagesByAgency($agency_id) {
+    $stmt = $this->conn->prepare("
+        SELECT P.Package_id, P.Name, P.Price, P.Description,
+               (SELECT Image FROM package_images PI WHERE PI.Package_id = P.Package_id LIMIT 1) AS Image
+        FROM package P
+        WHERE P.User_id = ?
+    ");
+    $stmt->bind_param('i', $agency_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $ret = [];
+    while($val = $result->fetch_assoc()){ 
+        $ret[] = $val; 
+    }
+    $stmt->close();
+    return $ret;
+}
 
 
 	//made the images easier to store with forloop
@@ -354,28 +388,43 @@ class Database {
         return true;
     }
 
-	public function bookPackage($params){
-		$code_id = null;
-		$trip_id = null;
-		if (isset($params["trip_id"])){
-			$trip_id = $params["trip_id"];
-		}
-		if (isset($params["code_name"])){
-			$stmt = $this->conn->prepare('SELECT code_id FROM promo_code WHERE code_name=?');
-			$stmt->bind_param('s', $params["code_name"]);
-			$stmt->execute();
-			$result = $stmt->get_result();
-			$code_id = ($result->fetch_assoc())["code_id"];
-			$stmt->close();
-		}
+	public function bookPackage($params) {
+    // Check for unique booking: User + Package + Start Date
+    $stmt = $this->conn->prepare('SELECT 1 FROM books WHERE User_id = ? AND Package_id = ? AND start_date = ?');
+    $stmt->bind_param('iis', $_SESSION["user_id"], $params["package_id"], $params["start_date"]);
+    $stmt->execute();
+    if($stmt->get_result()->fetch_assoc()){
+        $stmt->close();
+        return false;
+    }
+    $stmt->close();
 
-		$stmt = $this->conn->prepare('INSERT INTO books (user_id, package_id, code_id, trip_id) VALUES (?, ?, ?, ?)');
-		$stmt->bind_param('iiii', $_SESSION["user_id"], $params["package_id"], $code_id, $trip_id);
-		$ret = $stmt->execute();
-		$stmt->close();
+    $trip_id = null;
+    $guests = (int)$params['guests'];
+    if ($guests > 1) {
+        $stmt = $this->conn->prepare("INSERT INTO group_trip (Package_id, Departure_date, Capacity) VALUES (?, ?, ?)");
+        $stmt->bind_param('isi', $params['package_id'], $params['start_date'], $guests);
+        $stmt->execute();
+        $trip_id = $this->conn->insert_id;
+        $stmt->close();
+    }
 
-	}
+    $code_id = null;
+    if (!empty($params["code_name"])){
+        $stmt = $this->conn->prepare('SELECT Code_id FROM promo_code WHERE Code_name = ?');
+        $stmt->bind_param('s', $params["code_name"]);
+        $stmt->execute();
+        $res = $stmt->get_result()->fetch_assoc();
+        if ($res) $code_id = (int)$res["Code_id"];
+        $stmt->close();
+    }
 
+    $stmt = $this->conn->prepare('INSERT INTO books (User_id, Package_id, Code_id, Trip_id, start_date, end_date) VALUES (?, ?, ?, ?, ?, ?)');
+    $stmt->bind_param('iiiiss', $_SESSION["user_id"], $params["package_id"], $code_id, $trip_id, $params['start_date'], $params['end_date']);
+    $ret = $stmt->execute();
+    $stmt->close();
+    return $ret;
+}
 	public function getAccomodation($service_id){
 		$stmt = $this->conn->prepare('SELECT s.street, s.city, s.code, s.type, a.name
 		FROM service s 
@@ -433,53 +482,54 @@ class Database {
 
 
 	public function getPackage($package_id){
-		$stmt = $this->conn->prepare('SELECT p.Name as name, p.Price as price, p.Description as description, p.Target_id as target_id, ta.Agency_name as agency_name 
-		FROM PACKAGE p
-		LEFT JOIN TRAVEL_AGENCY ta ON p.User_id = ta.User_id
-		WHERE p.Package_id=?');
+		$stmt = $this->conn->prepare('SELECT p.Name as name, p.Price as price, p.Description as description, p.Target_id as target_id, ta.Agency_name as agency_name  
+		FROM package p LEFT JOIN travel_agency ta ON p.User_id = ta.User_id WHERE p.Package_id=?');
 		$stmt->bind_param('i', $package_id);
 		$stmt->execute();
 		$result = $stmt->get_result();
 		$packageInfo = $result->fetch_assoc();
-        $stmt->close();
+		$stmt->close();
 
-		$stmt = $this->conn->prepare('SELECT Image FROM PACKAGE_IMAGES WHERE Package_id = ?');
-        $stmt->bind_param('i', $package_id);
-        $stmt->execute();
-        $imgResult = $stmt->get_result();
-        $images = [];
-        while($row = $imgResult->fetch_assoc()) {
-            $images[] = $row['Image'];
-        }
-        $stmt->close();
+		$stmt = $this->conn->prepare('SELECT Image FROM package_images WHERE Package_id = ?');
+		$stmt->bind_param('i', $package_id);
+		$stmt->execute();
+		$imgResult = $stmt->get_result();
+		$images = [];
+		while($row = $imgResult->fetch_assoc()) {
+			$images[] = $row['Image'];
+		}
+		$stmt->close();
 
-		$stmt = $this->conn->prepare('SELECT i.Service_id as service_id, s.Type as type, s.Street as street, s.City as city, s.Code as code, 
-           acc.Name as acc_name, fli.Flight_number as flight_number, dest.Description as dest_desc
-			FROM INCLUDES i 
-			JOIN SERVICE s ON i.Service_id = s.Service_id
-			LEFT JOIN ACCOMMODATION acc ON s.Service_id = acc.Service_id
-			LEFT JOIN FLIGHT fli ON s.Service_id = fli.Service_id
-			LEFT JOIN DESTINATION dest ON s.Service_id = dest.Service_id
+		$stmt = $this->conn->prepare('SELECT i.Service_id as service_id, s.Type as type, s.Street as street, s.City as city, s.Code as code,
+			acc.Name as acc_name, 
+			attr.Name as attr_name,
+			rest.Name as rest_name,
+			fli.Flight_number as flight_number, 
+			dest.Description as dest_desc 
+			FROM includes i  
+			JOIN service s ON i.Service_id = s.Service_id 
+			LEFT JOIN accommodation acc ON s.Service_id = acc.Service_id 
+			LEFT JOIN attraction attr ON s.Service_id = attr.Service_id 
+			LEFT JOIN restaurant rest ON s.Service_id = rest.Service_id 
+			LEFT JOIN flight fli ON s.Service_id = fli.Service_id 
+			LEFT JOIN destination dest ON s.Service_id = dest.Service_id 
 			WHERE i.Package_id=?');
-
-			$stmt->bind_param('i', $package_id);
-			$stmt->execute();
-			$result = $stmt->get_result();
-
-			$services = [];
-			while($val = $result->fetch_assoc()){
-				$serviceData = [
-					'type' => $val['type'],
-					'street' => $val['street'],
-					'city' => $val['city'],
-					'code' => $val['code'],
-					'name' => $val['acc_name'] ?? $val['flight_number'] ?? $val['dest_desc']
-				];
-				$services[] = $serviceData;
-			}
-			$stmt->close();
-
-			return ["packageInfo" => $packageInfo, "services" => $services, "images" => $images];
+		$stmt->bind_param('i', $package_id);
+		$stmt->execute();
+		$result = $stmt->get_result();
+		$services = [];
+		while($val = $result->fetch_assoc()){
+			$serviceData = [
+				'type' => $val['type'],
+				'street' => $val['street'],
+				'city' => $val['city'],
+				'code' => $val['code'],
+				'name' => $val['acc_name'] ?? $val['attr_name'] ?? $val['rest_name'] ?? $val['flight_number'] ?? $val['dest_desc']
+			];
+			$services[] = $serviceData;
+		}
+		$stmt->close();
+		return ["packageInfo" => $packageInfo, "services" => $services, "images" => $images];
 	}
 	
 	public function updatePackage($params) 
@@ -649,27 +699,59 @@ class Database {
         
         return $ret;
     }
-	public function getAgentPackages($user_id) 
-	{
-		$stmt = $this->conn->prepare("
-			SELECT P.Package_id, P.Name, P.Price, P.Description,
-			 (SELECT Image FROM PACKAGE_IMAGES PI WHERE PI.Package_id = P.Package_id LIMIT 1) AS Image
-			FROM PACKAGE P 
-			WHERE P.User_id = ?
-		");
-		$stmt->bind_param('i', $user_id);
-		$stmt->execute();
-		$result = $stmt->get_result();
-		
-		$ret = [];
-		while($val = $result->fetch_assoc())
-		{
-			$ret[] = $val;
-		}
-		return $ret;
-	}
-// create group trip
+	public function getAgentPackages($user_id) {
+        $stmt = $this->conn->prepare("SELECT P.Package_id, P.Name, P.Price, P.Description, (SELECT Image FROM PACKAGE_IMAGES PI WHERE PI.Package_id = P.Package_id LIMIT 1) AS Image FROM PACKAGE P WHERE P.User_id = ?");
+        $stmt->bind_param('i', $user_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        
+        $ret = [];
+        while($val = $result->fetch_assoc()) {
+            $ret[] = $val;
+        }
+        return $ret;
+    }
+
+    public function getAgencyBookings($agency_id) {
+        $stmt = $this->conn->prepare("
+            SELECT P.Name as PackageName, U.Email, T.Fname, T.Lname, P.Price, B.start_date, B.end_date, 
+                   (CASE WHEN B.Trip_id IS NOT NULL THEN 'Yes' ELSE 'No' END) as IsGroupTrip,
+                   IFNULL(GT.Capacity, 1) as Guests,
+                   (P.Price * IFNULL(GT.Capacity, 1)) as TotalPrice
+            FROM books B 
+            JOIN package P ON B.Package_id = P.Package_id 
+            JOIN user U ON B.User_id = U.User_id 
+            JOIN traveller T ON B.User_id = T.User_id 
+            LEFT JOIN group_trip GT ON B.Trip_id = GT.Trip_id
+            WHERE P.User_id = ?
+        ");
+        $stmt->bind_param('i', $agency_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $ret = [];
+        while($val = $result->fetch_assoc()){ $ret[] = $val; }
+        $stmt->close();
+        return $ret;
+    }
+
+    public function getMyBookings($user_id) {
+        $stmt = $this->conn->prepare("
+            SELECT P.Package_id, P.Name, P.Price, P.Description, P.Target_id, B.start_date, B.end_date, 
+                   IFNULL(GT.Capacity, 1) as Guests,
+                   (P.Price * IFNULL(GT.Capacity, 1)) as TotalPrice,
+                   (SELECT Image FROM package_images PI WHERE PI.Package_id = P.Package_id LIMIT 1) AS Image 
+            FROM books B 
+            JOIN package P ON B.Package_id = P.Package_id 
+            LEFT JOIN group_trip GT ON B.Trip_id = GT.Trip_id
+            WHERE B.User_id = ?
+        ");
+        $stmt->bind_param('i', $user_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $ret = [];
+        while($val = $result->fetch_assoc()){ $ret[] = $val; }
+        $stmt->close();
+        return $ret;
+    }
 }
-
-
 ?>

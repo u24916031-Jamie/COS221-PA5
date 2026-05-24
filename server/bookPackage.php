@@ -11,6 +11,12 @@ function bookPackage($data) {
         echo json_encode(['status' => 'error', 'data' => 'Missing booking details']);
         return;
     }
+	
+    if (strtotime($data["end_date"]) > strtotime($data["start_date"])) {
+        header('HTTP/1.1 400 Bad Request');
+        echo json_encode(['status' => 'error', 'data' => 'Booking cannot end before it began']);
+        return;
+    }
     if ($db->bookPackage($data)) {
         header('HTTP/1.1 200 OK');
         echo json_encode(['status' => 'success']);

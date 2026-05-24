@@ -11,7 +11,7 @@ function loginAgency(event) {
 		.then(response => response.json())
 		.then(data => {
 			if (data.status === 'success') {
-				window.location.href = "../client/agentView.php";
+				window.location.href = "./agentPackages.php";
 			} else {
 				alert('Login failed: ' + (data.data?.reason || 'Invalid credentials'));
 			}

@@ -26,7 +26,7 @@
     </span>
 	<?php
 	if (isset($_SESSION["user_type"])){
-		if ($_SESSION["user_type"] == "traveller"){
+		if ($_SESSION["user_type"] == "Traveller"){
 			echo '<a href="./logoutTraveller.php" class="logout-btn">Logout</a>';
 		}else {
 			echo '<a href="./logoutAgency.php" class="logout-btn">Logout</a>';

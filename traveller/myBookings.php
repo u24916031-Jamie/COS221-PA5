@@ -1,3 +1,19 @@
+<?php
+	 if (session_status() === PHP_SESSION_NONE) {
+        session_start();
+    }
+if (!isset($_SESSION["user_type"])){
+	echo '
+	<script>
+	window.location.href = "loginTraveller.html";
+	</script>
+	';
+}
+
+
+?>
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>

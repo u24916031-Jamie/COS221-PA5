@@ -1,5 +1,4 @@
 -- 1. Delete Relationship/Transaction tables (The most "dependent" tables)
-DELETE FROM `APPLIES`;
 DELETE FROM `BOOKS`;
 DELETE FROM `INCLUDES`;
 DELETE FROM `REVIEW`;

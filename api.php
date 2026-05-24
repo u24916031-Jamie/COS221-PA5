@@ -16,6 +16,9 @@
 	require_once("./server/getAgentPackages.php");
 	require_once("./server/deletePackage.php");
 	require_once("./server/updatePackage.php");
+	require_once("./server/getMyBookings.php");
+	require_once("./server/getAgencyBookings.php");
+	require_once("./server/viewTravelAgency.php");
 	
 	$db = Database::instance();
 	$method = $_SERVER["REQUEST_METHOD"];
@@ -71,7 +74,7 @@
 				getPackage($data);
 				break;
 			case "bookPackage":
-				bookPackage($data);
+				bookPackage($data); 
 				break;
 			case "viewPackage":
 				viewPackage($data);
@@ -85,11 +88,15 @@
 			case "updatePackage":
 				updatePackage($data);
 				break;
-
-
-
-				case "viewTravelAgency": break;
-
+			case "getMyBookings":
+				getMyBookings($data);
+				break;
+			case "getAgencyBookings":
+				getAgencyBookings($data);
+				break;
+			case "viewTravelAgency":
+				viewTravelAgency($data);
+				break;
 
 				case "createGroupTrip": break;
 

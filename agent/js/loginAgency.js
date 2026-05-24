@@ -1,43 +1,25 @@
+const loginForm = document.querySelector("#loginForm");
 
-const loginForm = document.querySelector("#loginFormAgency");
+function loginAgency(event) {
+  event.preventDefault();
+  const formData = new FormData(loginForm);
 
-function loginTraveller(e) {
-
-	e.preventDefault();
-
-	const formData = new FormData(loginForm);
-
-	fetch('../api.php', {
-		method: 'POST',
-		body: formData
-	})
-		.then(async response => {
-			const rawTextResponse = await response.text();
-
-			try {
-				return JSON.parse(rawTextResponse);
-			} catch (err) {
-				console.error("Incorrect response format", rawTextResponse);
-			}
-		})
-		.then(data => {
-			if (data.status === 'success') {
-				window.location.href = "agentPackages.php";
-			} else {
-				//error login failed
-				alert("Login failed.");
-				console.log(data.data);
-				throw new Error(`Server returned code`);
-			}
-		})
-		.catch(error => {
-			console.error('Login failed:');
-		});
-
-
-
-
+  fetch('../api.php', {
+    method: 'POST',
+    body: formData
+  })
+    .then(response => response.json())
+    .then(data => {
+      if (data.status === 'success') {
+        window.location.href = "../client/agentView.html";
+      } else {
+        alert('Login failed: ' + (data.data?.reason || 'Invalid credentials'));
+      }
+    })
+    .catch(error => {
+      console.error('Login failed:', error);
+      alert('Login failed. Please try again.');
+    });
 }
 
-
-loginForm.addEventListener("submit", loginTraveller);
+loginForm.addEventListener('submit', loginAgency);

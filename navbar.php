@@ -1,7 +1,7 @@
 <nav class="navbar">
   <div class="nav-group">
-    <a href="/COS221-PA5/index.html">Home</a>
-    <a href="/COS221-PA5/traveller/browsePackage.php">Browse</a>
+    <a href="/index.html">Home</a>
+    <a href="/traveller/browsePackage.php">Browse</a>
     
     <?php 
     if (session_status() === PHP_SESSION_NONE) {
@@ -9,8 +9,8 @@
     }
 
     if (isset($_SESSION["user_type"]) && $_SESSION["user_type"] === "Travel Agency") {
-        echo '<a href="/COS221-PA5-main/agent/addSinglePackage.php">Add Package</a>';
-        echo '<a href="/COS221-PA5-main/agent/agentPackages.php">My Packages</a>';
+        echo '<a href="/agent/addSinglePackage.php">Add Package</a>';
+        echo '<a href="/agent/agentPackages.php">My Packages</a>';
     }
     ?>
   </div>
@@ -19,6 +19,6 @@
     <span class="user-display">
         <?php echo isset($_SESSION["user_type"]) ? "Welcome, " . $_SESSION["user_type"] : "Welcome"; ?>
     </span>
-    <a href="/COS221-PA5-main/traveller/logoutTraveller.php" class="logout-btn">Logout</a>
+    <a href="./logoutTraveller.php" class="logout-btn">Logout</a>
   </div>
 </nav>

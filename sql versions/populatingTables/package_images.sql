@@ -71,7 +71,7 @@ insert into package_images (Package_id, Image) values (36, 'https://images.unspl
 insert into package_images (Package_id, Image) values (243, 'https://images.unsplash.com/photo-1506744038136-46273834b3fb');
 insert into package_images (Package_id, Image) values (41, 'https://images.unsplash.com/photo-1544025162-d76694265947');
 insert into package_images (Package_id, Image) values (102, 'https://images.unsplash.com/photo-1515206026834-575804fca7d9');
-insert into package_images (Package_id, Image) values (209, 'https://images.unsplash.com/photo-1504674900247-0877df9cc836');
+
 insert into package_images (Package_id, Image) values (94, 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5');
 insert into package_images (Package_id, Image) values (266, 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5');
 insert into package_images (Package_id, Image) values (177, 'https://images.unsplash.com/photo-1559339352-11d035aa65de');

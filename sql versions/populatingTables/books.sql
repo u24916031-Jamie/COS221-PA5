@@ -1,12 +1,4 @@
-create table books (
-	Booking_id INT,
-	User_id VARCHAR(4),
-	Package_id VARCHAR(4),
-	Code_id VARCHAR(4),
-	Trip_id VARCHAR(4),
-	start_date DATE,
-	end_date DATE
-);
+
 insert into books (Booking_id, User_id, Package_id, Code_id, Trip_id, start_date, end_date) values (1, 492, 706, 674, 158, '3/3/2026', '10/1/2025');
 insert into books (Booking_id, User_id, Package_id, Code_id, Trip_id, start_date, end_date) values (2, 749, 600, 478, 372, '9/24/2025', '12/9/2025');
 insert into books (Booking_id, User_id, Package_id, Code_id, Trip_id, start_date, end_date) values (3, 40, 229, 467, 693, '3/9/2026', '6/6/2025');

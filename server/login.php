@@ -42,6 +42,10 @@ function login($data){
 		return;
 	}
 
+
+	$_SESSION["loggedin"] = true;
+	$_SESSION["user_id"] = $ret["User_id"];
+	$_SESSION["user_type"] = $ret["User_type"];
 	$_SESSION["email"] =  $ret["Email"];
 	$_SESSION["cell"] = $ret["Cell"];
 

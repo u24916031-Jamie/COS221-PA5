@@ -12,9 +12,11 @@ function logout(){
 		unset($_SESSION["user_type"]);
 		unset($_SESSION["email"]);
 		unset($_SESSION["cell"]);
+		
 		unset($_SESSION["fname"]);
 		unset($_SESSION["lname"]);
 		unset($_SESSION["id_number"]);
+
 		unset($_SESSION["agency_name"]);
 		unset($_SESSION["contact_fname"]);
 		unset($_SESSION["contact_lname"]);

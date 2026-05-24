@@ -6,13 +6,18 @@ function bookPackage($data) {
         echo json_encode(['status' => 'error', 'data' => 'Must be logged in']);
         return;
     }
+    if ($_SESSION["user_type"] == "Travel Agency") {
+        header('HTTP/1.1 401 Unauthorized');
+        echo json_encode(['status' => 'error', 'data' => 'Only travellers can book packages']);
+        return;
+    }
     if (!isset($data["package_id"]) || !isset($data["start_date"]) || !isset($data["end_date"]) || !isset($data["guests"])) {
         header('HTTP/1.1 400 Bad Request');
         echo json_encode(['status' => 'error', 'data' => 'Missing booking details']);
         return;
     }
 	
-    if (strtotime($data["end_date"]) > strtotime($data["start_date"])) {
+    if (strtotime($data["start_date"]) > strtotime($data["end_date"])) {
         header('HTTP/1.1 400 Bad Request');
         echo json_encode(['status' => 'error', 'data' => 'Booking cannot end before it began']);
         return;

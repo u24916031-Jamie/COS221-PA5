@@ -17,7 +17,7 @@
   
   <div class="nav-group">
     <span class="user-display">
-        <?php echo isset($_SESSION["user_type"]) ? "Welcome, " . $_SESSION["user_type"] : "Welcome"; ?>
+        <?php echo isset($_SESSION["user_type"]) ? "Welcome, " . $_SESSION["fname"] : "Welcome"; ?>
     </span>
     <a href="./logoutTraveller.php" class="logout-btn">Logout</a>
   </div>

@@ -22,8 +22,8 @@
   </div>
   <div class="nav-group">
     <span class="user-display">
-        <?php echo isset($userType) ? "Welcome, " . htmlspecialchars($userType) : "Welcome"; ?>
+        <?php echo isset($_SESSION["user_type"]) ? "Welcome, " . $_SESSION["fname"] : "Welcome"; ?>
     </span>
-    <a href="/COS221-PA5-main/server/logoutapi.php" class="logout-btn">Logout</a>
+    <a href="./logoutTraveller.php" class="logout-btn">Logout</a>
   </div>
 </nav>

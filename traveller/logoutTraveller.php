@@ -2,7 +2,7 @@
 session_start();
 // Security check: If they aren't logged in, send them straight back to login page
 if (!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true) {
-    header("Location: loginTraveller.html");
+    header("Location: loginTraveller.php");
     exit();
 }
 ?>

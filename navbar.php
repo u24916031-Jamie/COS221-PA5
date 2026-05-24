@@ -22,8 +22,26 @@
   </div>
   <div class="nav-group">
     <span class="user-display">
-        <?php echo isset($_SESSION["user_type"]) ? "Welcome, " . $_SESSION["fname"] : "Welcome"; ?>
+		<?php
+		if (isset($_SESSION["user_type"])){
+			if ($_SESSION["user_type"] == "Traveller"){
+				echo  "Welcome, " . $_SESSION["fname"];
+			}else {
+				echo "Welcome, " . $_SESSION["agency_name"];
+			}
+		}else{
+			echo "Welcome";
+		}
+		?>
     </span>
-    <a href="./logoutTraveller.php" class="logout-btn">Logout</a>
+	<?php
+	if (isset($_SESSION["user_type"])){
+		if ($_SESSION["user_type"] == "Traveller"){
+			echo '<a href="./logoutTraveller.php" class="logout-btn">Logout</a>';
+		}else {
+			echo '<a href="./logoutAgency.php" class="logout-btn">Logout</a>';
+		}
+	}
+	?>
   </div>
 </nav>

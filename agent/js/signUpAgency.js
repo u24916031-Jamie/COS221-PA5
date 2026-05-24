@@ -1,4 +1,4 @@
-const signupForm = document.querySelector("#signUpAgency");
+const signupForm = document.querySelector("#signupForm");
 
 function registerTraveller(e) {
 	e.preventDefault();
@@ -21,7 +21,7 @@ function registerTraveller(e) {
 		.then(data => {
 			if (data.status === 'success') {
 				alert("Registration successful! Please login.");
-				window.location.href = "loginAgency.html";
+				window.location.href = "loginAgency.php";
 			} else {
 				alert("Registration failed: " + (data.data?.reason || "Unknown error"));
 				console.log(data.data);

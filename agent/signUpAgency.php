@@ -1,7 +1,7 @@
 <!doctype html>
 <html>
   <head>
-    <title>Traveller Signup</title>
+    <title>Travel Agency Signup</title>
     <link rel="stylesheet" href="../css/homePage.css" />
     <link rel="stylesheet" href="../css/signUp.css" />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" /> 
@@ -9,20 +9,23 @@
 
   <div class = "login-card" style = "width: 500px">
     <form id="signupForm">
-      <h3>Sign Up</h3>
+      <h3>Sign Up And Become a Agent!</h3>
         <input type="hidden" name="type" value="register">
-        <input type="hidden" name="user_type" value="Traveller">
+        <input type="hidden" name="user_type" value="Travel Agency">
 
         <input type = "email" name="email" placeholder = "Email" required>
         <input type = "password" name="password" placeholder = "Password" required>
         <input type="text" name = "cell" placeholder="Cellphone number" required>
-        <input type="text" name="fname" placeholder="Enter your first name" required>
-        <input type="text" name="lname" placeholder="Enter your surname" required>
-        <input type="text" name="id_number" placeholder="Enter your id number" required>
+        <input type="text" name="agency_name" placeholder="Enter agency name">
+        <input type="text" name="contact_fname" placeholder="Enter contact person first name">
+        <input type="text" name="contact_lname" placeholder="Enter contact person surname">
         <div id="signupError" class="form-error"></div>
-      <button type="submit" class="agent-button">Sign up</button>
-      <p>Already have an account?<a href = "loginTraveller.html"> Sign in </a></p>
-    </form>
+
+        <button type="submit" class="agent-button">Sign up</button>
+      </form>
+      <script src = "./js/signUpAgency.js"></script>
+        
+    
   </div>
   <script>
     const signupForm = document.getElementById('signupForm');
@@ -42,7 +45,7 @@
         signupError.textContent = result.data?.reason || 'Signup failed. Please try again.';
         return;
       }
-      window.location.href = 'loginTraveller.html';
+      window.location.href = 'loginAgency.php';
     });
   </script>
 </html>

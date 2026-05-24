@@ -21,7 +21,7 @@ function registerTraveller(e) {
 		.then(data => {
 			if (data.status === 'success') {
 				alert("Registration successful! Please login.");
-				window.location.href = "loginTraveller.html";
+				window.location.href = "loginTraveller.php";
 			} else {
 				alert("Registration failed: " + (data.data?.reason || "Unknown error"));
 				console.log(data.data);

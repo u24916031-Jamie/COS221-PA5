@@ -1,3 +1,22 @@
+<?php
+	 if (session_status() === PHP_SESSION_NONE) {
+        session_start();
+    }
+if (isset($_SESSION["user_type"])){
+	if ($_SESSION["user_type"] == "traveller"){
+		echo '
+		<script>
+		window.location.href = "browsePackage.php";
+		</script>
+		';
+	}
+}
+
+
+?>
+
+
+
 <!doctype html>
 <html>
   <head>
@@ -21,7 +40,7 @@
           <input type = "password" name="password" placeholder = "Password" required>
           <button type="submit" class="agent-button">Login</button>
           </form>
-          <p>Don't have an account?<a href = "signUpTraveller.html"> Sign in </a></p>
+          <p>Don't have an account?<a href = "signUpTraveller.php"> Sign up </a></p>
         </div>
       </div>
     </div>

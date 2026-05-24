@@ -90,15 +90,15 @@ class Database {
 
 	public function emailExists($userEmail){
 		$stmt = $this->conn->prepare('SELECT 1 FROM user WHERE Email=?');
-    $email = $userEmail;
+  		$email = $userEmail;
 		$stmt->bind_param('s', $email);
 		
 
 		$stmt->execute();
 		$result = $stmt->get_result();
 
-    $exists = ($result->fetch_assoc() !== null);
-    $stmt->close();
+		$exists = ($result->fetch_assoc() !== null);
+		$stmt->close();
 
 
 		return $exists;
@@ -171,7 +171,11 @@ class Database {
 	// agency_name, contact_fname, contact_lname, target_id 
 	public function getUserData($email){
 		// should always be a valid email
-		$stmt = $this->conn->prepare('SELECT * FROM user U LEFT JOIN traveller T ON U.user_id = T.user_id LEFT JOIN travel_agency A ON U.user_id = A.user_id WHERE U.email = ?');
+		$stmt = $this->conn->prepare('SELECT * 
+			FROM user
+			LEFT JOIN traveller USING (user_id)
+			LEFT JOIN travel_agency USING (user_id)
+			WHERE email = ?');
 		$stmt->bind_param('s', $email);
 
 		$stmt->execute();
@@ -220,7 +224,9 @@ class Database {
 	public function review($params) {
         $user_id = $_SESSION["user_id"];
         $target_id = $params['target_id'];
-
+		/*
+		var_dump($user_id);
+		var_dump($target_id);
         $stmt = $this->conn->prepare("
             SELECT B.end_date 
             FROM books B 
@@ -232,10 +238,13 @@ class Database {
         $stmt->execute();
         $res = $stmt->get_result()->fetch_assoc();
         $stmt->close();
-
+		var_dump($res);
+		var_dump(strtotime($res['end_date']));
+		var_dump(strtotime('today'));
         if (!$res || strtotime($res['end_date']) >= strtotime('today')) {
             return false;
         }
+		*/
 
         $stmt = $this->conn->prepare('INSERT INTO review (review_id, rating, comment, date, user_id, target_id) VALUES (NULL, ?, ?, ?, ?, ?)');
         $rating = $params['rating'];
@@ -301,22 +310,22 @@ class Database {
     }
 	
 	public function getPackagesByAgency($agency_id) {
-    $stmt = $this->conn->prepare("
-        SELECT P.Package_id, P.Name, P.Price, P.Description,
-               (SELECT Image FROM package_images PI WHERE PI.Package_id = P.Package_id LIMIT 1) AS Image
-        FROM package P
-        WHERE P.User_id = ?
-    ");
-    $stmt->bind_param('i', $agency_id);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    $ret = [];
-    while($val = $result->fetch_assoc()){ 
-        $ret[] = $val; 
-    }
-    $stmt->close();
-    return $ret;
-}
+		$stmt = $this->conn->prepare("
+			SELECT P.Package_id, P.Name, P.Price, P.Description,
+				(SELECT Image FROM package_images PI WHERE PI.Package_id = P.Package_id LIMIT 1) AS Image
+			FROM package P
+			WHERE P.User_id = ?
+		");
+		$stmt->bind_param('i', $agency_id);
+		$stmt->execute();
+		$result = $stmt->get_result();
+		$ret = [];
+		while($val = $result->fetch_assoc()){ 
+			$ret[] = $val; 
+		}
+		$stmt->close();
+		return $ret;
+	}
 
 
 	//made the images easier to store with forloop
@@ -389,42 +398,42 @@ class Database {
     }
 
 	public function bookPackage($params) {
-    // Check for unique booking: User + Package + Start Date
-    $stmt = $this->conn->prepare('SELECT 1 FROM books WHERE User_id = ? AND Package_id = ? AND start_date = ?');
-    $stmt->bind_param('iis', $_SESSION["user_id"], $params["package_id"], $params["start_date"]);
-    $stmt->execute();
-    if($stmt->get_result()->fetch_assoc()){
-        $stmt->close();
-        return false;
-    }
-    $stmt->close();
+		// Check for unique booking: User + Package + Start Date
+		$stmt = $this->conn->prepare('SELECT 1 FROM books WHERE User_id = ? AND Package_id = ? AND start_date = ?');
+		$stmt->bind_param('iis', $_SESSION["user_id"], $params["package_id"], $params["start_date"]);
+		$stmt->execute();
+		if($stmt->get_result()->fetch_assoc()){
+			$stmt->close();
+			return false;
+		}
+		$stmt->close();
 
-    $trip_id = null;
-    $guests = (int)$params['guests'];
-    if ($guests > 1) {
-        $stmt = $this->conn->prepare("INSERT INTO group_trip (Package_id, Departure_date, Capacity) VALUES (?, ?, ?)");
-        $stmt->bind_param('isi', $params['package_id'], $params['start_date'], $guests);
-        $stmt->execute();
-        $trip_id = $this->conn->insert_id;
-        $stmt->close();
-    }
+		$trip_id = null;
+		$guests = (int)$params['guests'];
+		if ($guests > 1) {
+			$stmt = $this->conn->prepare("INSERT INTO group_trip (Package_id, Departure_date, Capacity) VALUES (?, ?, ?)");
+			$stmt->bind_param('isi', $params['package_id'], $params['start_date'], $guests);
+			$stmt->execute();
+			$trip_id = $this->conn->insert_id;
+			$stmt->close();
+		}
 
-    $code_id = null;
-    if (!empty($params["code_name"])){
-        $stmt = $this->conn->prepare('SELECT Code_id FROM promo_code WHERE Code_name = ?');
-        $stmt->bind_param('s', $params["code_name"]);
-        $stmt->execute();
-        $res = $stmt->get_result()->fetch_assoc();
-        if ($res) $code_id = (int)$res["Code_id"];
-        $stmt->close();
-    }
+		$code_id = null;
+		if (!empty($params["code_name"])){
+			$stmt = $this->conn->prepare('SELECT Code_id FROM promo_code WHERE Code_name = ?');
+			$stmt->bind_param('s', $params["code_name"]);
+			$stmt->execute();
+			$res = $stmt->get_result()->fetch_assoc();
+			if ($res) $code_id = (int)$res["Code_id"];
+			$stmt->close();
+		}
 
-    $stmt = $this->conn->prepare('INSERT INTO books (User_id, Package_id, Code_id, Trip_id, start_date, end_date) VALUES (?, ?, ?, ?, ?, ?)');
-    $stmt->bind_param('iiiiss', $_SESSION["user_id"], $params["package_id"], $code_id, $trip_id, $params['start_date'], $params['end_date']);
-    $ret = $stmt->execute();
-    $stmt->close();
-    return $ret;
-}
+		$stmt = $this->conn->prepare('INSERT INTO books (User_id, Package_id, Code_id, Trip_id, start_date, end_date) VALUES (?, ?, ?, ?, ?, ?)');
+		$stmt->bind_param('iiiiss', $_SESSION["user_id"], $params["package_id"], $code_id, $trip_id, $params['start_date'], $params['end_date']);
+		$ret = $stmt->execute();
+		$stmt->close();
+		return $ret;
+	}
 	public function getAccomodation($service_id){
 		$stmt = $this->conn->prepare('SELECT s.street, s.city, s.code, s.type, a.name
 		FROM service s 
@@ -448,7 +457,7 @@ class Database {
 	}
 
 	public function getDestination($service_id){
-	$stmt = $this->conn->prepare('SELECT s.street, s.city, s.code, s.type, d.description
+		$stmt = $this->conn->prepare('SELECT s.street, s.city, s.code, s.type, d.description
 		FROM service s 
 		JOIN destination d ON s.service_id = d.service_id
 		WHERE s.service_id=?');
@@ -753,5 +762,17 @@ class Database {
         $stmt->close();
         return $ret;
     }
+
+	public function getAgencyDetails($agency_id){
+		// should always be a valid email
+		$stmt = $this->conn->prepare('SELECT * FROM user U JOIN travel_agency A ON U.user_id = A.user_id WHERE U.user_id=?');
+		$stmt->bind_param('s', $agency_id);
+
+		$stmt->execute();
+		$result = $stmt->get_result();
+	
+	
+		return $result->fetch_assoc();
+	}
 }
 ?>

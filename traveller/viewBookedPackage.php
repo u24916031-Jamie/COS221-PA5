@@ -5,7 +5,7 @@
 if (!isset($_SESSION["user_type"])){
 	echo '
 	<script>
-	window.location.href = "loginTraveller.html";
+	window.location.href = "loginTraveller.php";
 	</script>
 	';
 }

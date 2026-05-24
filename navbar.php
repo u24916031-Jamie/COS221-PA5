@@ -24,6 +24,17 @@
     <span class="user-display">
         <?php echo isset($_SESSION["user_type"]) ? "Welcome, " . $_SESSION["fname"] : "Welcome"; ?>
     </span>
-    <a href="./logoutTraveller.php" class="logout-btn">Logout</a>
+	<?php
+	if (isset($_SESSION["user_type"])){
+		if ($_SESSION["user_type"] == "traveller"){
+			echo '<a href="./logoutTraveller.php" class="logout-btn">Logout</a>';
+		}else {
+			echo '<a href="./logoutAgency.php" class="logout-btn">Logout</a>';
+		}
+	}
+    
+
+
+	?>
   </div>
 </nav>

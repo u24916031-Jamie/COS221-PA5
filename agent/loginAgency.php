@@ -21,7 +21,7 @@
             <input type = "password" name="password" placeholder = "Password" required>
             <button type="submit" class="agent-button">Enter dashboard</button>
           </form>
-            <p>Don't have an account?<a href = "signUpAgency.html"> Sign up </a></p>
+            <p>Don't have an account?<a href = "signUpAgency.php"> Sign up </a></p>
             <script src="./js/loginAgency.js"></script>
         </div>
       </div>

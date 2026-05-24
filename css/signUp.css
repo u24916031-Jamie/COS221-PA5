@@ -11,6 +11,15 @@ form{
   align-items: center;
 }
 
+.form-error {
+  width: 90%;
+  margin: 0 0 12px;
+  color: #b12a2a;
+  font-size: 0.95rem;
+  text-align: left;
+  min-height: 1.25rem;
+}
+
 .submit{
   border-radius: 20px;
   border: none;

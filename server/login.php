@@ -28,9 +28,20 @@ function login($data){
 	//get details to populate session once user logged in
 
 	$ret = $db->getUserData($email);
-	$_SESSION["loggedin"] = true;
-	$_SESSION["user_id"] = $ret["User_id"];
-	$_SESSION["User_type"] = $ret["User_type"];
+	if (isset($data['user_type']) && $data['user_type'] !== $ret['User_type']) {
+		$retdata = [
+			"status" => "fail",
+			"timestamp" => time(),
+			"data" => [
+				"reason" => "This login page is for {$data['user_type']} accounts only."
+			]
+		];
+		header("HTTP/1.1 403 Forbidden");
+		header("Content-Type: application/json");
+		echo json_encode($retdata);
+		return;
+	}
+
 	$_SESSION["email"] =  $ret["Email"];
 	$_SESSION["cell"] = $ret["Cell"];
 

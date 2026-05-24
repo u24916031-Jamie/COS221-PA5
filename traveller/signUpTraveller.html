@@ -8,7 +8,7 @@
   </head>
 
   <div class = "login-card" style = "width: 500px">
-    <form action="../api.php" method="POST">
+    <form id="signupForm">
       <h3>Sign Up</h3>
         <input type="hidden" name="type" value="register">
         <input type="hidden" name="user_type" value="Traveller">
@@ -19,9 +19,30 @@
         <input type="text" name="fname" placeholder="Enter your first name" required>
         <input type="text" name="lname" placeholder="Enter your surname" required>
         <input type="text" name="id_number" placeholder="Enter your id number" required>
-        
+        <div id="signupError" class="form-error"></div>
       <button type="submit" class="agent-button">Sign up</button>
-      <p>Already have an account?<a href = "loginAgency.html"> Sign in </a></p>
+      <p>Already have an account?<a href = "loginTraveller.html"> Sign in </a></p>
     </form>
   </div>
+  <script>
+    const signupForm = document.getElementById('signupForm');
+    const signupError = document.getElementById('signupError');
+    signupForm.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      signupError.textContent = '';
+      const formData = new FormData(signupForm);
+      const data = Object.fromEntries(formData.entries());
+      const response = await fetch('../api.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      const result = await response.json();
+      if (!response.ok) {
+        signupError.textContent = result.data?.reason || 'Signup failed. Please try again.';
+        return;
+      }
+      window.location.href = 'loginTraveller.html';
+    });
+  </script>
 </html>

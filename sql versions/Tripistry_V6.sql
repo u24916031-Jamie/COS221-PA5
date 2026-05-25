@@ -188,7 +188,7 @@ CREATE TABLE `service` (
   `Street` varchar(100) DEFAULT NULL,
   `City` varchar(50) DEFAULT NULL,
   `Code` varchar(20) DEFAULT NULL,
-  `Type` enum('Attraction','Accomodation','Destination','Flight','Restaurant') NOT NULL
+  `Type` enum('Attraction','Accommodation','Destination','Flight','Restaurant') NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------

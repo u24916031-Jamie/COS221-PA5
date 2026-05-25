@@ -6,6 +6,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const bookingForm = document.getElementById('bookingForm');
     const loadingState = document.getElementById('loadingState');
     const packageContent = document.getElementById('packageContent');
+    const reviewAgencyBtn = document.getElementById("reviewAgencyBtn");
+
+
 
     let currentSlide = 0;
     let slideInterval;

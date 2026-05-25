@@ -45,6 +45,7 @@
                     </button>
                     
                     <button type="submit" class="submit-btn" id="saveChangesBtn">Save Changes</button>
+                    <button type="button" class="submit-btn" style="margin-top: 10px;" onclick="window.location.href='viewMyBookings.php'">View Bookings</button>
                     <button type="button" class="submit-btn" style="background: #dc3545; margin-top: 10px;" onclick="window.location.href='agentPackages.php'">Cancel</button>
                 </form>
             </div>

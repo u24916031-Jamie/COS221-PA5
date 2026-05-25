@@ -1,58 +1,167 @@
 document.addEventListener('DOMContentLoaded', () => {
-	const urlParams = new URLSearchParams(window.location.search);
-	const agencyId = urlParams.get('id');
-	const grid = document.getElementById('agencyPackagesGrid');
 
-	async function fetchAgencyData() {
-		try {
-			const response = await fetch('../api.php', {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ type: 'viewTravelAgency', agency_id: agencyId })
-			});
-			const result = await response.json();
+    const grid = document.getElementById('bookingsGrid');
+    const modal = document.getElementById('reviewModal');
 
-			if (result.status === 'success') {
-				const info = result.data.info;
-				const packages = result.data.packages;
-			
+    async function fetchMyBookings() {
 
-				document.getElementById('agencyName').textContent = info.Agency_name || "Unknown Agency";
-				document.getElementById('agencyContact').textContent = `Agent Contact: ${info.Contact_Fname || ''} ${info.contact_lname || ''}`;
-				document.getElementById('agencyEmail').textContent = `Email: ${info.Email || 'N/A'}`;
+        const response = await fetch('../api.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                type: 'getMyBookings'
+            })
+        });
 
-				grid.innerHTML = '';
-				if (!packages || packages.length === 0) {
-					grid.innerHTML = '<p style="text-align:center; width:100%; color: white; font-size: 18px;">This agency has no packages yet.</p>';
-					return;
-				}
+        const result = await response.json();
 
-				packages.forEach(pkg => {
-					const price = pkg.Price ? parseFloat(pkg.Price) : 0;
-					const image = pkg.Image || '../img/tripBack.avif';
-					const name = pkg.Name || 'Unnamed Package';
-					const desc = pkg.Description || 'No description provided.';
-					const packageId = pkg.Package_id;
+        if (result.status === 'success') {
+            renderBookings(result.data);
+        }
+    }
 
-					const card = document.createElement('div');
-					card.className = 'package-card';
-					card.innerHTML = `
-                        <img src="${image}" class="package-img" alt="${name}">
-                        <div class="package-info">
-                            <h3 style="margin-top: 0; font-size: 22px;">${name}</h3>
-                            <p class="package-price">ZAR ${price.toLocaleString('en-ZA', { minimumFractionDigits: 2 })}</p>
-                            <p class="package-desc">${desc.substring(0, 100)}...</p>
-                            <button class="book-btn" onclick="window.location.href='packageDetails.php?id=${packageId}'">
-                                View Details
-                            </button>
-                        </div>
-                    `;
-					grid.appendChild(card);
-				});
-			}
-		} catch (error) {
-			console.error("Fetch Error:", error);
-		}
-	}
-	fetchAgencyData();
+    function renderBookings(data) {
+
+        grid.innerHTML = '';
+
+        if (!data || data.length === 0) {
+
+            grid.innerHTML =
+                '<p style="color:white; font-size: 18px;">No active bookings.</p>';
+
+            return;
+        }
+
+        const today = new Date();
+
+        today.setHours(0, 0, 0, 0);
+
+        data.forEach(pkg => {
+
+            const endDate = new Date(pkg.end_date);
+
+            const canReview = today > endDate;
+
+            const card = document.createElement('div');
+
+            card.className = 'package-card';
+
+            card.innerHTML = `
+                <img src="${pkg.Image || '../img/tripBack.avif'}" class="package-img">
+
+                <div class="package-info">
+
+                    <h3>${pkg.Name}</h3>
+
+                    <p style="color: #1F80FF; font-weight: bold; font-size: 18px; margin: 5px 0;">
+
+                        ZAR ${parseFloat(pkg.TotalPrice).toLocaleString('en-ZA', {
+                            minimumFractionDigits: 2
+                        })}
+
+                        <span style="color: #666; font-size: 12px; font-weight: normal;">
+                            (${pkg.Guests} Guests)
+                        </span>
+
+                    </p>
+
+                    <p style="font-size: 14px; font-weight: bold; margin-bottom: 10px;">
+
+                        Dates: ${pkg.start_date || 'N/A'}
+                        to
+                        ${pkg.end_date || 'N/A'}
+
+                    </p>
+
+                    <div style="display: flex; gap: 10px; margin-top: 15px;">
+
+                        <button class="book-btn"
+                                onclick="window.location.href='viewBookedPackage.php?id=${pkg.Package_id}'"
+                                style="flex: 1;">
+
+                            View
+
+                        </button>
+
+                        ${
+                            canReview
+
+                            ? `<button class="book-btn review-btn"
+                                       style="flex: 1; background: #4CAF50;">
+
+                                    Review
+
+                               </button>`
+
+                            : `<button class="book-btn"
+                                       style="flex: 1; background: #ccc; cursor: not-allowed;"
+                                       disabled>
+
+                                    Review Later
+
+                               </button>`
+                        }
+
+                    </div>
+
+                </div>
+            `;
+
+            if (canReview) {
+
+                card.querySelector('.review-btn').onclick = function () {
+
+                    document.getElementById('reviewTargetId').value =
+                        pkg.Target_id;
+
+                    document.getElementById('reviewDate').value =
+                        new Date().toISOString().split('T')[0];
+
+                    modal.classList.remove('hidden');
+
+                };
+            }
+
+            grid.appendChild(card);
+
+        });
+    }
+
+    document.getElementById('reviewForm').onsubmit = async function (e) {
+
+        e.preventDefault();
+
+        const response = await fetch('../api.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(
+                Object.fromEntries(new FormData(e.target))
+            )
+        });
+
+        const result = await response.json();
+
+        if (result.status === 'success') {
+
+            modal.classList.add('hidden');
+
+            alert('Review Submitted!');
+
+            fetchMyBookings();
+
+        } else {
+
+            alert('Error: ' + result.data);
+
+        }
+    };
+
+    document.getElementById('closeModal').onclick = function () {
+
+        modal.classList.add('hidden');
+
+    };
+
+    fetchMyBookings();
+
 });

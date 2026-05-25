@@ -1,11 +1,14 @@
 document.addEventListener('DOMContentLoaded', () => {
-	const packageId = new URLSearchParams(window.location.search).get('id');
-	const modal = document.getElementById('bookingModal');
-	const bookBtn = document.getElementById('bookBtn');
-	const closeBtn = document.getElementById('closeModal');
-	const bookingForm = document.getElementById('bookingForm');
-	const loadingState = document.getElementById('loadingState');
-	const packageContent = document.getElementById('packageContent');
+    const packageId = new URLSearchParams(window.location.search).get('id');
+    const modal = document.getElementById('bookingModal');
+    const bookBtn = document.getElementById('bookBtn');
+    const closeBtn = document.getElementById('closeModal');
+    const bookingForm = document.getElementById('bookingForm');
+    const loadingState = document.getElementById('loadingState');
+    const packageContent = document.getElementById('packageContent');
+    const reviewAgencyBtn = document.getElementById("reviewAgencyBtn");
+
+
 
 	let currentSlide = 0;
 	let slideInterval;

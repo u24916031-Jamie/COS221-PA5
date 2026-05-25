@@ -69,7 +69,13 @@
                         <span class="price-label">Total Price</span>
                         <h2 class="price-amount">ZAR <span id="pkgPrice">0.00</span></h2>
                     </div>
+
                     <button id="bookBtn" class="btn-primary full-width">Book This Package</button>
+
+                      <button id="reviewAgencyBtn" class="btn-secondary full-width">
+                        Review Travel Agency
+                      </button>
+
                     <div class="guarantee-box">
                         <p>✅ Instant Confirmation</p>
                         <p>🔒 Secure Payment</p>
@@ -97,6 +103,52 @@
             <input type="date" name="end_date" required>
             
             <button type="submit" class="btn-primary" style="margin-top: 10px;">Confirm & Book</button>
+        </form>
+    </div>
+</div>
+<div id="agencyReviewModal" class="modal-overlay hidden">
+    <div class="modal-content">
+        <span class="close-modal" id="closeAgencyModal">&times;</span>
+
+        <h2>Review This Travel Agency</h2>
+
+        <form id="agencyReviewForm">
+
+            <input type="hidden" name="type" value="agency_review">
+
+            <input type="hidden"
+                   id="agencyReviewTargetId"
+                   name="target_id"
+                   value="">
+
+            <label for="agencyReviewRating">Rating (1-5)</label>
+
+            <select id="agencyReviewRating"
+                    name="rating"
+                    required>
+
+                <option value="5">5 - Excellent</option>
+                <option value="4">4 - Very Good</option>
+                <option value="3">3 - Average</option>
+                <option value="2">2 - Poor</option>
+                <option value="1">1 - Terrible</option>
+
+            </select>
+
+            <label for="agencyReviewComment">Comment</label>
+
+            <textarea id="agencyReviewComment"
+                      name="comment"
+                      placeholder="Tell us about this agency..."
+                      required></textarea>
+
+            <button type="submit"
+                    class="submit-review-btn">
+
+                Submit Review
+
+            </button>
+
         </form>
     </div>
 </div>

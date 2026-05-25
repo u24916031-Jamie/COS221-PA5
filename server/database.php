@@ -359,7 +359,6 @@ class Database {
         if (!empty($params["images"])) {
             $this->addImagesToPackage($params["images"], $package_id);
         }
-
         if (!empty($params["services"])) {
         foreach ($params["services"] as $svc) 
 			{

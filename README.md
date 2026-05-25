@@ -16,7 +16,7 @@ Create a file named ".env" int the server directory and fill in your local datab
 1. Open your favourite browser and navigate to your database management UI (usually http://localhost/phpmyadmin/index.php)
 2. Create a new database named "tripistry" and have it match the previously made ".env" file
 3. Click on "Import".
-4. Click "Choose File" and select the dump file in our directory: Tripistry_V7.sql
+4. Click "Choose File" and select the dump file in our directory: Tripistry_V7_with_data.sql
 5. Click on Go/Import - this sets up all the tables needed.
 
 ### Step 4:

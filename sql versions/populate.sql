@@ -97,7 +97,7 @@ INSERT INTO `FLIGHT` (`Service_id`, `Flight_number`) VALUES (@s_flight, 'FA100')
 INSERT INTO `ATTRACTION` (`Service_id`, `Name`) VALUES (@s_attr, 'uShaka Marine World');
 INSERT INTO `ACCOMMODATION` (`Service_id`, `Name`) VALUES (@s_hotel, 'Sun Coast Hotel');
 INSERT INTO `RESTAURANT` (`Service_id`, `Name`) VALUES (@s_rest, 'Mozambik');
-INSERT INTO `DESTINATION` (`Service_id`, `Description`) VALUES (@s_dest, 'South Africa\'s premier beach destination.');
+INSERT INTO `DESTINATION` (`Service_id`, `Description`) VALUES (@s_dest, 'South Africa's premier beach destination.');
 
 -- PROMO_CODE
 INSERT INTO `PROMO_CODE` (`Discount_percentage`) VALUES (10.00), (15.50);

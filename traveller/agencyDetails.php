@@ -2,15 +2,18 @@
 	 if (session_status() === PHP_SESSION_NONE) {
         session_start();
     }
-if (!isset($_SESSION["user_type"])){
-	echo '
-	<script>
-	window.location.href = "loginTraveller.php";
-	</script>
-	';
-}
-
-
+	if (!isset($_SESSION["user_type"])){
+		header("Location: ./loginTraveller.php");
+		exit;
+	}else {
+		if ($_SESSION["user_type"] == "Travel Agency"){
+			header("Location: ../agent/agentPackages.php");
+			exit;
+		}
+	}
+		
+		
+		
 ?>
 
 
@@ -36,6 +39,7 @@ if (!isset($_SESSION["user_type"])){
             <h1 id="agencyName">Loading Agency...</h1>
             <p id="agencyContact">Please wait</p>
             <p id="agencyEmail"></p>
+			<span class="rating-badge-agency" id="rating-badge-agency">★ -15.0</span>
         </div>
 
         <div class="packages-grid" id="agencyPackagesGrid">

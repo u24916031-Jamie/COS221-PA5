@@ -10,14 +10,15 @@ document.addEventListener('DOMContentLoaded', () => {
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({ type: 'viewTravelAgency', agency_id: agencyId })
 			});
-			//console.log(await response.text())
 			const result = await response.json();
 
 			if (result.status === 'success') {
 				const info = result.data.info;
 				const packages = result.data.packages;
-				console.log(info);
-				console.log(packages);
+
+
+				const rating = result.data.rating ? parseFloat(result.data.rating).toFixed(1) : '0.0';
+				document.getElementById("rating-badge-agency").textContent = `★ ${rating}`;
 
 				document.getElementById('agencyName').textContent = info.Agency_name || "Unknown Agency";
 				document.getElementById('agencyContact').textContent = `Agent Contact: ${info.Contact_Fname || ''} ${info.contact_lname || ''}`;

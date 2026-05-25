@@ -2,19 +2,19 @@
 	 if (session_status() === PHP_SESSION_NONE) {
         session_start();
     }
-if (isset($_SESSION["user_type"])){
-	if ($_SESSION["user_type"] == "traveller"){
-		echo '
-		<script>
-		window.location.href = "browsePackage.php";
-		</script>
-		';
+	if (isset($_SESSION["user_type"])) {
+		if ($_SESSION["user_type"] == "Travel Agency"){
+			header("Location: ../agent/agentPackages.php");
+			exit;
+		} else{
+			header("Location: ../traveller/browsePackage.php");
+			exit;
+		}
 	}
-}
-
-
+		
+		
+		
 ?>
-
 
 
 <!doctype html>

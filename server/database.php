@@ -359,7 +359,6 @@ class Database {
         if (!empty($params["images"])) {
             $this->addImagesToPackage($params["images"], $package_id);
         }
-
         if (!empty($params["services"])) {
         foreach ($params["services"] as $svc) 
 			{
@@ -437,7 +436,7 @@ class Database {
 	public function getAccommodation($service_id){
 		$stmt = $this->conn->prepare('SELECT s.street, s.city, s.code, s.type, a.name
 		FROM service s 
-		JOIN accommodation a ON s.service_id = a.service_id
+		JOIN Accommodation a ON s.service_id = a.service_id
 		WHERE s.service_id=?');
 		$stmt->bind_param('i', $service_id);
 		$stmt->execute();
@@ -491,7 +490,7 @@ class Database {
 
 
 	public function getPackage($package_id){
-		$stmt = $this->conn->prepare('SELECT p.Name as name, p.Price as price, p.Description as description, p.Target_id as target_id, ta.Agency_name as agency_name  
+		$stmt = $this->conn->prepare('SELECT p.Name as name, p.Price as price, p.Description as description, p.Target_id as target_id, ta.Target_id as agency_target_id, ta.Agency_name as agency_name, ta.User_id as agency_id  
 		FROM package p LEFT JOIN travel_agency ta ON p.User_id = ta.User_id WHERE p.Package_id=?');
 		$stmt->bind_param('i', $package_id);
 		$stmt->execute();
@@ -766,6 +765,17 @@ class Database {
 	public function getAgencyDetails($agency_id){
 		// should always be a valid email
 		$stmt = $this->conn->prepare('SELECT * FROM user U JOIN travel_agency A ON U.user_id = A.user_id WHERE U.user_id=?');
+		$stmt->bind_param('s', $agency_id);
+
+		$stmt->execute();
+		$result = $stmt->get_result();
+	
+	
+		return $result->fetch_assoc();
+	}
+	public function getAgencyRating($agency_id){
+		// should always be a valid email
+		$stmt = $this->conn->prepare('SELECT IFNULL(AVG(R.Rating), 0) AS rating FROM review R JOIN travel_agency A ON R.target_id = A.target_id WHERE A.user_id=? GROUP BY R.target_id');
 		$stmt->bind_param('s', $agency_id);
 
 		$stmt->execute();

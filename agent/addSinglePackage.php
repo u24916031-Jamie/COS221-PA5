@@ -1,3 +1,20 @@
+<?php
+	 if (session_status() === PHP_SESSION_NONE) {
+        session_start();
+    }
+	if (!isset($_SESSION["user_type"])){
+		header("Location: ./loginAgency.php");
+		exit;
+	}else {
+		if ($_SESSION["user_type"] == "Traveller"){
+			header("Location: ../traveller/browsePackage.php");
+			exit;
+		}
+	}	
+?>
+
+
+
 <!doctype html>
 <html lang="en">
 <head>
@@ -44,6 +61,7 @@
                     <input type="hidden" name="type" value="createPackage">
 
                     <button type="submit" class="submit-btn">Publish Single Package</button>
+					 <button type="button" class="submit-btn" style="background: #dc3545; margin-top: 10px;" onclick="window.location.href='agentPackages.php'">Cancel</button>
                 </form>
             </div>
         </div>

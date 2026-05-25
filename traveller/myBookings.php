@@ -2,16 +2,20 @@
 	 if (session_status() === PHP_SESSION_NONE) {
         session_start();
     }
-if (!isset($_SESSION["user_type"])){
-	echo '
-	<script>
-	window.location.href = "loginTraveller.php";
-	</script>
-	';
-}
-
-
+	if (!isset($_SESSION["user_type"])){
+		header("Location: ./loginTraveller.php");
+		exit;
+	}else {
+		if ($_SESSION["user_type"] == "Travel Agency"){
+			header("Location: ../agent/agentPackages.php");
+			exit;
+		}
+	}
+		
+		
+		
 ?>
+
 
 
 <!DOCTYPE html>
@@ -35,31 +39,6 @@ if (!isset($_SESSION["user_type"])){
         </div>
     </div>
 
-    <div id="reviewModal" class="modal-overlay hidden">
-        <div class="modal-content">
-            <span class="close-modal" id="closeModal">&times;</span>
-            <h2>Review this Package</h2>
-            <form id="reviewForm">
-                <input type="hidden" name="type" value="review">
-                <input type="hidden" id="reviewTargetId" name="target_id" value="">
-                <input type="hidden" id="reviewDate" name="date" value="">
-
-                <label for="reviewRating">Rating (1-5)</label>
-                <select id="reviewRating" name="rating" required>
-                    <option value="5">5 - Excellent</option>
-                    <option value="4">4 - Very Good</option>
-                    <option value="3">3 - Average</option>
-                    <option value="2">2 - Poor</option>
-                    <option value="1">1 - Terrible</option>
-                </select>
-
-                <label for="reviewComment">Comment</label>
-                <textarea id="reviewComment" name="comment" placeholder="Tell us about your experience..." required></textarea>
-
-                <button type="submit" class="submit-review-btn">Submit Review</button>
-            </form>
-        </div>
-    </div>
 
     <script src="./js/myBookings.js"></script>
 </body>

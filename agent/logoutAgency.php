@@ -58,7 +58,7 @@ if (!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true) {
                     <input type="hidden" name="type" value="logout">
                     <button type="submit" class="confirm-btn">Yes, Logout</button>
                 </form>
-                <a href="browsePackage.php" class="cancel-btn">Cancel</a>
+                <a href="agentPackages.php" class="cancel-btn">Cancel</a>
             </div>
         </div>
     </div>

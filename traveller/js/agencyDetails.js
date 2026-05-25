@@ -1,52 +1,52 @@
 document.addEventListener('DOMContentLoaded', () => {
 
-    const grid = document.getElementById('bookingsGrid');
-    const modal = document.getElementById('reviewModal');
+	const grid = document.getElementById('bookingsGrid');
+	const modal = document.getElementById('reviewModal');
 
-    async function fetchMyBookings() {
+	async function fetchMyBookings() {
 
-        const response = await fetch('../api.php', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                type: 'getMyBookings'
-            })
-        });
+		const response = await fetch('../api.php', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({
+				type: 'getMyBookings'
+			})
+		});
 
-        const result = await response.json();
+		const result = await response.json();
 
-        if (result.status === 'success') {
-            renderBookings(result.data);
-        }
-    }
+		if (result.status === 'success') {
+			renderBookings(result.data);
+		}
+	}
 
-    function renderBookings(data) {
+	function renderBookings(data) {
 
-        grid.innerHTML = '';
+		grid.innerHTML = '';
 
-        if (!data || data.length === 0) {
+		if (!data || data.length === 0) {
 
-            grid.innerHTML =
-                '<p style="color:white; font-size: 18px;">No active bookings.</p>';
+			grid.innerHTML =
+				'<p style="color:white; font-size: 18px;">No active bookings.</p>';
 
-            return;
-        }
+			return;
+		}
 
-        const today = new Date();
+		const today = new Date();
 
-        today.setHours(0, 0, 0, 0);
+		today.setHours(0, 0, 0, 0);
 
-        data.forEach(pkg => {
+		data.forEach(pkg => {
 
-            const endDate = new Date(pkg.end_date);
+			const endDate = new Date(pkg.end_date);
 
-            const canReview = today > endDate;
+			const canReview = today > endDate;
 
-            const card = document.createElement('div');
+			const card = document.createElement('div');
 
-            card.className = 'package-card';
+			card.className = 'package-card';
 
-            card.innerHTML = `
+			card.innerHTML = `
                 <img src="${pkg.Image || '../img/tripBack.avif'}" class="package-img">
 
                 <div class="package-info">
@@ -56,8 +56,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     <p style="color: #1F80FF; font-weight: bold; font-size: 18px; margin: 5px 0;">
 
                         ZAR ${parseFloat(pkg.TotalPrice).toLocaleString('en-ZA', {
-                            minimumFractionDigits: 2
-                        })}
+				minimumFractionDigits: 2
+			})}
 
                         <span style="color: #666; font-size: 12px; font-weight: normal;">
                             (${pkg.Guests} Guests)
@@ -83,85 +83,84 @@ document.addEventListener('DOMContentLoaded', () => {
 
                         </button>
 
-                        ${
-                            canReview
+                        ${canReview
 
-                            ? `<button class="book-btn review-btn"
+					? `<button class="book-btn review-btn"
                                        style="flex: 1; background: #4CAF50;">
 
                                     Review
 
                                </button>`
 
-                            : `<button class="book-btn"
+					: `<button class="book-btn"
                                        style="flex: 1; background: #ccc; cursor: not-allowed;"
                                        disabled>
 
                                     Review Later
 
                                </button>`
-                        }
+				}
 
                     </div>
 
                 </div>
             `;
 
-            if (canReview) {
+			if (canReview) {
 
-                card.querySelector('.review-btn').onclick = function () {
+				card.querySelector('.review-btn').onclick = function () {
 
-                    document.getElementById('reviewTargetId').value =
-                        pkg.Target_id;
+					document.getElementById('reviewTargetId').value =
+						pkg.Target_id;
 
-                    document.getElementById('reviewDate').value =
-                        new Date().toISOString().split('T')[0];
+					document.getElementById('reviewDate').value =
+						new Date().toISOString().split('T')[0];
 
-                    modal.classList.remove('hidden');
+					modal.classList.remove('hidden');
 
-                };
-            }
+				};
+			}
 
-            grid.appendChild(card);
+			grid.appendChild(card);
 
-        });
-    }
+		});
+	}
 
-    document.getElementById('reviewForm').onsubmit = async function (e) {
+	document.getElementById('reviewForm').onsubmit = async function (e) {
 
-        e.preventDefault();
+		e.preventDefault();
 
-        const response = await fetch('../api.php', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(
-                Object.fromEntries(new FormData(e.target))
-            )
-        });
+		const response = await fetch('../api.php', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify(
+				Object.fromEntries(new FormData(e.target))
+			)
+		});
 
-        const result = await response.json();
+		const result = await response.json();
 
-        if (result.status === 'success') {
+		if (result.status === 'success') {
 
-            modal.classList.add('hidden');
+			modal.classList.add('hidden');
 
-            alert('Review Submitted!');
+			alert('Review Submitted!');
 
-            fetchMyBookings();
+			fetchMyBookings();
 
-        } else {
+		} else {
 
-            alert('Error: ' + result.data);
+			alert('Error: ' + result.data);
 
-        }
-    };
+		}
+	};
 
-    document.getElementById('closeModal').onclick = function () {
+	document.getElementById('closeModal').onclick = function () {
 
-        modal.classList.add('hidden');
+		modal.classList.add('hidden');
 
-    };
+	};
 
-    fetchMyBookings();
+	fetchMyBookings();
 
 });

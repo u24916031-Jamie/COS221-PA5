@@ -433,10 +433,10 @@ class Database {
 		$stmt->close();
 		return $ret;
 	}
-	public function getAccomodation($service_id){
+	public function getAccommodation($service_id){
 		$stmt = $this->conn->prepare('SELECT s.street, s.city, s.code, s.type, a.name
 		FROM service s 
-		JOIN accomodation a ON s.service_id = a.service_id
+		JOIN Accommodation a ON s.service_id = a.service_id
 		WHERE s.service_id=?');
 		$stmt->bind_param('i', $service_id);
 		$stmt->execute();

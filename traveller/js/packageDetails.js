@@ -34,6 +34,8 @@ document.addEventListener('DOMContentLoaded', () => {
 			});
 			const result = await response.json();
 			if (result.status === 'success' && result.data) {
+				document.getElementById("agencyLink").href = `agencyDetails.php?id=${result.data.packageInfo.agency_id}`;
+
 				populateUI(result.data.packageInfo, result.data.services, result.data.images, id);
 			}
 		} catch (error) {

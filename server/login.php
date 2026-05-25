@@ -1,5 +1,5 @@
 <?php
-require_once "database.php";
+//require_once "database.php";
 
 
 function login($data){
@@ -23,7 +23,7 @@ function login($data){
 		header("Content-Type: application/json");
 
 		echo json_encode($retdata);
-		return;
+		exit();
 	}
 	//get details to populate session once user logged in
 
@@ -42,6 +42,10 @@ function login($data){
 		return;
 	}
 
+
+	$_SESSION["loggedin"] = true;
+	$_SESSION["user_id"] = $ret["User_id"];
+	$_SESSION["user_type"] = $ret["User_type"];
 	$_SESSION["email"] =  $ret["Email"];
 	$_SESSION["cell"] = $ret["Cell"];
 
@@ -57,11 +61,7 @@ function login($data){
 	$_SESSION["target_id"] = (isset($ret["Target_id"])) ? $ret["Target_id"]: null;
 
 	//redirect based on type
-  if($ret["User_type"] == "Travel Agency"){
-    header("Location: ./client/agentView.html");
-  }else if($ret["User_type"] == "Traveller"){
-    header("Location: ./traveller/browsePackage.php");
-  }
+  
   
 	header("HTTP/1.1 200 Ok");
 	header("Content-Type: application/json");

@@ -1,3 +1,19 @@
+<?php
+	 if (session_status() === PHP_SESSION_NONE) {
+        session_start();
+    }
+	if (!isset($_SESSION["user_type"])){
+		header("Location: ./loginAgency.php");
+		exit;
+	}else {
+		if ($_SESSION["user_type"] == "Traveller"){
+			header("Location: ../traveller/browsePackage.php");
+			exit;
+		}
+	}	
+?>
+
+
 <!doctype html>
 <html lang="en">
 <head>

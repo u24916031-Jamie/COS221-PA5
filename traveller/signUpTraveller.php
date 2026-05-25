@@ -1,3 +1,19 @@
+<?php
+	 if (session_status() === PHP_SESSION_NONE) {
+        session_start();
+    }
+	if (isset($_SESSION["user_type"])){
+		if ($_SESSION["user_type"] == "Travel Agency"){
+			header("Location: ../agent/agentPackages.php");
+			exit;
+		}else{
+			header("Location: ../traveller/browsePackage.php");
+			exit;
+		}
+	}	
+?>
+
+
 <!doctype html>
 <html>
   <head>
@@ -21,7 +37,7 @@
         <input type="text" name="id_number" placeholder="Enter your id number" required>
         <div id="signupError" class="form-error"></div>
       <button type="submit" class="agent-button">Sign up</button>
-      <p>Already have an account?<a href = "loginTraveller.html"> Sign in </a></p>
+      <p>Already have an account?<a href = "loginTraveller.php"> Sign in </a></p>
     </form>
   </div>
   <script>
@@ -42,7 +58,7 @@
         signupError.textContent = result.data?.reason || 'Signup failed. Please try again.';
         return;
       }
-      window.location.href = 'loginTraveller.html';
+      window.location.href = 'loginTraveller.php';
     });
   </script>
 </html>

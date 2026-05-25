@@ -1,3 +1,19 @@
+<?php
+	 if (session_status() === PHP_SESSION_NONE) {
+        session_start();
+    }
+	if (isset($_SESSION["user_type"])){
+		if ($_SESSION["user_type"] == "Travel Agency"){
+			header("Location: ../agent/agentPackages.php");
+			exit;
+		}else{
+			header("Location: ../traveller/browsePackage.php");
+			exit;
+		}
+	}	
+?>
+
+
 <!doctype html>
 <html>
   <head>
@@ -21,7 +37,8 @@
             <input type = "password" name="password" placeholder = "Password" required>
             <button type="submit" class="agent-button">Enter dashboard</button>
           </form>
-            <p>Don't have an account?<a href = "signUpAgency.html"> Sign in </a></p>
+            <p>Don't have an account?<a href = "signUpAgency.php"> Sign up </a></p>
+            <script src="./js/loginAgency.js"></script>
         </div>
       </div>
     </div>

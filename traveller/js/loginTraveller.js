@@ -7,26 +7,31 @@ function loginTraveller(e) {
 
 	const formData = new FormData(loginForm);
 
-	fetch('../../api.php', {
+	fetch('../api.php', {
 		method: 'POST',
 		body: formData
 	})
-		.then(response => {
+		.then(async response => {
+			const rawTextResponse = await response.text();
 
-			return response.json();
+			try {
+				return JSON.parse(rawTextResponse);
+			} catch (err) {
+				console.error("Incorrect response format", rawTextResponse);
+			}
 		})
 		.then(data => {
 			if (data.status === 'success') {
-				window.location.href = "/traveller/browsePackage.php"
+				window.location.href = "browsePackage.php";
 			} else {
 				//error login failed
 				alert("Login failed.");
 				console.log(data.data);
-				throw new Error(`Server returned code: ${data.status}`);
+				throw new Error(`Server returned code`);
 			}
 		})
 		.catch(error => {
-			console.error('Login failed:', error);
+			console.error('Login failed:');
 		});
 
 

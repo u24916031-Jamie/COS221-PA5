@@ -80,11 +80,11 @@ document.addEventListener('DOMContentLoaded', () =>
         block.innerHTML = `
             <select name="services[${index}][type]" class="service-type" required>
                 <option value="" disabled ${!existingData ? 'selected' : ''}>Category</option>
-                <option value="accommodation" ${existingData?.type === 'accommodation' ? 'selected' : ''}>Accommodation</option>
-                <option value="flight" ${existingData?.type === 'flight' ? 'selected' : ''}>Flight</option>
-                <option value="restaurant" ${existingData?.type === 'restaurant' ? 'selected' : ''}>Restaurant</option>
-                <option value="attraction" ${existingData?.type === 'attraction' ? 'selected' : ''}>Attraction</option>
-                <option value="destination" ${existingData?.type === 'destination' ? 'selected' : ''}>Destination</option>
+                <option value="accommodation" ${existingData?.type === 'Accommodation' ? 'selected' : ''}>Accommodation</option>
+                <option value="flight" ${existingData?.type === 'Flight' ? 'selected' : ''}>Flight</option>
+                <option value="restaurant" ${existingData?.type === 'Restaurant' ? 'selected' : ''}>Restaurant</option>
+                <option value="attraction" ${existingData?.type === 'Attraction' ? 'selected' : ''}>Attraction</option>
+                <option value="destination" ${existingData?.type === 'Destination' ? 'selected' : ''}>Destination</option>
             </select>
             <div class="dynamic-fields"></div>
             <button type="button" class="remove-service">Remove</button>
@@ -105,8 +105,8 @@ document.addEventListener('DOMContentLoaded', () =>
         const nameVal = data.name || data.flight_number || data.description || '';
         
         let html = '';
-        if(type === 'flight') html = `<input type="text" name="services[${index}][flight_number]" value="${nameVal}" placeholder="Flight #" required>`;
-        else if(type === 'destination') html = `<textarea name="services[${index}][description]" placeholder="Overview" required>${nameVal}</textarea>`;
+        if(type === 'Flight') html = `<input type="text" name="services[${index}][flight_number]" value="${nameVal}" placeholder="Flight #" required>`;
+        else if(type === 'Destination') html = `<textarea name="services[${index}][description]" placeholder="Overview" required>${nameVal}</textarea>`;
         else html = `<input type="text" name="services[${index}][name]" value="${nameVal}" placeholder="Name" required>`;
         
         fieldsDiv.innerHTML = `

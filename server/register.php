@@ -4,22 +4,26 @@
 
 function register($data){
 	$db = Database::instance();
-	if ($db->emailExists($data["email"])){
-		//user with email already exists
-		$retdata = [
-			"status" => "fail",
-			"timestamp" => time(),
-			"data" => [
-				"reason" => "User with provided email already exists."
-			]
-		];
+	$email = isset($data["email"]) ? $data["email"] : '';
+  $password = isset($data["password"]) ? $data["password"] : '';
+  $cell = isset($data["cell"]) ? $data["cell"] : '';
+  $user_type = isset($data["user_type"]) ? $data["user_type"] : 'Traveller';
+
+  if ($db->emailExists($email)){
+    $retdata = [
+      "status" => "fail",
+      "timestamp" => time(),
+      "data" => [
+        "reason" => "User with provided email already exists."
+      ]
+    ];
 
 
 		header("HTTP/1.1 409 Conflict");
 		header("Content-Type: application/json");
 
 		echo json_encode($retdata);
-		return;
+		exit();
 	}
 	// add user to DB
 
@@ -36,7 +40,7 @@ function register($data){
 		header("Content-Type: application/json");
 		echo json_encode($retdata);
 
-		return;
+		exit();
 	}
 
 
@@ -51,7 +55,7 @@ function register($data){
 		header("HTTP/1.1 400 Bad Request");
 		header("Content-Type: application/json");
 		echo json_encode($retdata);
-		return;
+		exit();
 	}
 
 
@@ -61,10 +65,10 @@ function register($data){
 	
 	$newUserData = [
 		// user
-		"user_type"=>$data["user_type"],
+		"user_type"=>$user_type,
 		"password_hash"=>$hashed_pass,
-		"email"=>$data["email"],
-		"cell"=>$data["cell"],
+		"email"=>$email,
+		"cell"=>$cell,
 		"salt"=>$salt,
 	// traveller
 		"fname"=>(isset($data["fname"])) ? $data["fname"] : null,
@@ -90,7 +94,4 @@ function register($data){
 
   exit();
 }
-
-
-
-	?>
+?>

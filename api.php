@@ -98,7 +98,7 @@
 				viewTravelAgency($data);
 				break;
 
-				case "createGroupTrip":
+				case "createGroupTrip": break;
 
 
 				

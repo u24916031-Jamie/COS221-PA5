@@ -1,11 +1,21 @@
 <?php
-session_start();
-// Security check: If they aren't logged in, send them straight back to login page
-if (!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true) {
-    header("Location: loginTraveller.php");
-    exit();
-}
+	 if (session_status() === PHP_SESSION_NONE) {
+        session_start();
+    }
+	if (!isset($_SESSION["user_type"])){
+		header("Location: ./loginTraveller.php");
+		exit;
+	}else {
+		if ($_SESSION["user_type"] == "Travel Agency"){
+			header("Location: ../agent/agentPackages.php");
+			exit;
+		}
+	}
+		
+		
+		
 ?>
+
 <!doctype html>
 <html>
 <head>

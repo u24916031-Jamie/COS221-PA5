@@ -2,17 +2,19 @@
 	 if (session_status() === PHP_SESSION_NONE) {
         session_start();
     }
-if (!isset($_SESSION["user_type"])){
-	echo '
-	<script>
-	window.location.href = "loginTraveller.php";
-	</script>
-	';
-}
-
-
+	if (!isset($_SESSION["user_type"])){
+		header("Location: ./loginTraveller.php");
+		exit;
+	}else {
+		if ($_SESSION["user_type"] == "Travel Agency"){
+			header("Location: ../agent/agentPackages.php");
+			exit;
+		}
+	}
+		
+		
+		
 ?>
-
 
 <!doctype html>
 <html lang="en">

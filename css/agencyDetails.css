@@ -25,4 +25,14 @@
     color: #666;
     font-weight: bold;
     margin-top: 5px;
+    margin-bottom: 5px;
+}
+
+.rating-badge-agency {
+    background: #FFD700;
+    color: #333;
+    padding: 4px 10px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 700;
 }

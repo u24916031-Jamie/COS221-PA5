@@ -49,7 +49,7 @@
                     <div class="package-header">
                         <span class="badge" id="pkgIdBadge"></span>
                         <h1 id="pkgTitle"></h1>
-                        <p class="agency-tag">Offered by <strong id="pkgAgency"></strong></p>
+                        <p class="agency-tag">Offered by <a id="agencyLink"><strong id="pkgAgency"></strong></a></p>
                     </div>
                     <div class="section-divider"></div>
                     <div class="content-section">

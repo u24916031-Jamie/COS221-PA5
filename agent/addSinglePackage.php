@@ -61,6 +61,7 @@
                     <input type="hidden" name="type" value="createPackage">
 
                     <button type="submit" class="submit-btn">Publish Single Package</button>
+					 <button type="button" class="submit-btn" style="background: #dc3545; margin-top: 10px;" onclick="window.location.href='agentPackages.php'">Cancel</button>
                 </form>
             </div>
         </div>

@@ -15,7 +15,10 @@ document.addEventListener('DOMContentLoaded', () => {
 			if (result.status === 'success') {
 				const info = result.data.info;
 				const packages = result.data.packages;
-			
+
+
+				const rating = result.data.rating ? parseFloat(result.data.rating).toFixed(1) : '0.0';
+				document.getElementById("rating-badge-agency").textContent = `★ ${rating}`;
 
 				document.getElementById('agencyName').textContent = info.Agency_name || "Unknown Agency";
 				document.getElementById('agencyContact').textContent = `Agent Contact: ${info.Contact_Fname || ''} ${info.contact_lname || ''}`;

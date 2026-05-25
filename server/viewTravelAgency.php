@@ -8,8 +8,9 @@ function viewTravelAgency($data) {
     }
     $info = $db->getAgencyDetails($agency_id);
     $pkgs = $db->getAgentPackages($agency_id);
+	$rating = $db->getAgencyRating($agency_id)["rating"];
     header('Content-Type: application/json');
-    echo json_encode(['status' => 'success', 'data' => ['info' => $info, 'packages' => $pkgs]]);
+    echo json_encode(['status' => 'success', 'data' => ['info' => $info, 'packages' => $pkgs, 'rating' => $rating]]);
     exit();
 }
 ?>

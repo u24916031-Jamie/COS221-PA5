@@ -39,6 +39,7 @@
             <h1 id="agencyName">Loading Agency...</h1>
             <p id="agencyContact">Please wait</p>
             <p id="agencyEmail"></p>
+			<span class="rating-badge-agency" id="rating-badge-agency">★ -15.0</span>
         </div>
 
         <div class="packages-grid" id="agencyPackagesGrid">

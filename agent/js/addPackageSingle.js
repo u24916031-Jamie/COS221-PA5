@@ -27,11 +27,11 @@ document.getElementById('add-service-btn').addEventListener('click', function() 
     block.innerHTML = `
         <select name="services[${index}][type]" class="service-type" required>
             <option value="" disabled selected>Select Service Category</option>
-            <option value="accommodation">Accommodation</option>
-            <option value="flight">Flight</option>
-            <option value="restaurant">Restaurant</option>
-            <option value="attraction">Attraction</option>
-            <option value="destination">Destination</option>
+            <option value="Accommodation">Accommodation</option>
+            <option value="Flight">Flight</option>
+            <option value="Restaurant">Restaurant</option>
+            <option value="Attraction">Attraction</option>
+            <option value="Destination">Destination</option>
         </select>
         <div class="dynamic-fields"></div>
         <button type="button" class="remove-service">Remove Service</button>
@@ -45,9 +45,9 @@ document.getElementById('add-service-btn').addEventListener('click', function() 
         
         let specificHTML = '';
         
-        if(type === 'flight') {
+        if(type === 'Flight') {
             specificHTML = `<input type="text" name="services[${index}][flight_number]" placeholder="Flight Number (e.g. FA100)" required>`;
-        } else if(type === 'destination') {
+        } else if(type === 'Destination') {
             specificHTML = `<textarea name="services[${index}][description]" placeholder="Destination Overview" required></textarea>`;
         } else {
             const capitalizedType = type.charAt(0).toUpperCase() + type.slice(1);
@@ -72,7 +72,7 @@ document.getElementById('add-service-btn').addEventListener('click', function() 
 document.getElementById('createPackageForm').addEventListener('submit', async function(e) {
     e.preventDefault(); 
     const formData = new FormData(this);
-
+    console.log(formData);
     try {
         const response = await fetch('../api.php', {
             method: 'POST',
@@ -80,6 +80,7 @@ document.getElementById('createPackageForm').addEventListener('submit', async fu
         });
 
         const textResponse = await response.text();
+        console.log(textResponse);
         if (!textResponse.trim().startsWith('{')) {
             console.error("Server crashed:", textResponse);
             alert("A server error occurred. Check the console.");
